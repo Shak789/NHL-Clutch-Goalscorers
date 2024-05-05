@@ -18,5 +18,6 @@ The averages of the percentiles for close and tied situations, as well as game-w
 - **Close Percentile:** 30%
 - **Tied Percentile:** 30%
 - **Game-Winning Goals Percentile:** 40%
+  
 A higher percentile was assigned to the game-winning goals because This statistic tracks actual goals scored in critical situations, unlike SAT% and USAT% which may provide inaccuracies due to the quality of shots.
 
