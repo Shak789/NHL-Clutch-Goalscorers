@@ -15,8 +15,8 @@ Other statistics such as goals scored in the third period as well as game-tying 
 
 ## Developing a Ranking System
 The averages of the percentiles for close and tied situations, as well as game-winning goals, were computed to determine a percentile ranking for a player’s clutch goalscoring. The following weightings were assigned to each of the percentile rankings:
-a)	Close Percentile: 30%
-b)	Tied Percentile: 30%
-c)	Game-Winning Goals Percentile: 40%
+- **Close Percentile:** 30%
+- **Tied Percentile:** 30%
+- **Game-Winning Goals Percentile:** 40%
 A higher percentile was assigned to the game-winning goals because This statistic tracks actual goals scored in critical situations, unlike SAT% and USAT% which may provide inaccuracies due to the quality of shots.
 
