@@ -16,11 +16,17 @@ I attempted to classify players as "clutch" and "non-clutch" by setting threshol
 
 ### 5. Switching to a Regression Model
 I realized that linear regression was a more feasible approach since many of the features were strongly correlated with a clutch score. It would, therefore, be easier to predict a player's clutch score rather than assigning the player an ambiguous label.  
+
 I refined the model by using Ridge regression and performed cross-validation to ensure there was no overfitting.
 
 ### 6. Dealing with Outliers
 I used Cook's Distance to identify influential points. I discovered that the model underpredicted the clutch score of elite players because their feature stats set a "ceiling" for their clutch ability. The model also overestimated some elite players who had strong underlying metrics but did not perform well in clutch games. In addition, the model struggled with below-average players who scored clutch goals at a rate that did not match their advanced stats.  
-This prompted me to use a log transformation, which enabled the model to generate better predictions for elite players and significantly reduced the number of influential points. However, this transformation caused some inaccuracies for below-average players, as it amplified the difference between predicted and actual clutch scores for players with low stats.
+
+This prompted me to use a log transformation, which enabled the model to generate better predictions for elite players and reduced the number of influential points. 
+
+The model still undervalued some players who performed better in close and tied situations than their metrics suggest. On the other hand, some players were overvalued beca metrics that may not fully reflect their clutch performance.  While influential points are often viewed negatively, they can provide valuable insights into players who perform well in high-pressure situations, even if they aren’t considered elite based on traditional metrics.
+
+Finally, some below-average players become influential because the log transformation tends to amplify the difference between smaller actual and predicted values.
 
 ### 7. Using the Model on a Final Test Set
 After I was satisfied with the model, I used it to predict the clutch score of players based on their statistics from the start of the 2023-2024 season to the current point of the 2024-2025 season.  
