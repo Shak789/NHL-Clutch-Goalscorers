@@ -24,9 +24,9 @@ I used Cook's Distance to identify influential points. I discovered that the mod
 
 This prompted me to use a log transformation, which enabled the model to generate better predictions for elite players and reduced the number of influential points. 
 
-The model still undervalued some players who performed better in close and tied situations than their metrics suggest. On the other hand, some players were overvalued beca metrics that may not fully reflect their clutch performance.  While influential points are often viewed negatively, they can provide valuable insights into players who perform well in high-pressure situations, even if they aren’t considered elite based on traditional metrics.
+The model still undervalued some players who performed better in close and tied situations than their metrics suggest. On the other hand, some players were overvalued because metrics that may not fully reflect their clutch performance.  While influential points are often viewed negatively, they can provide valuable insights into players who perform well in high-pressure situations, even if they aren’t considered elite based on traditional metrics.
 
-Finally, some below-average players become influential because the log transformation tends to amplify the difference between smaller actual and predicted values.
+Finally, some below-average players become influential since the log transformation tends to amplify the difference between smaller actual and predicted values.
 
 ### 7. Using the Model on a Final Test Set
 After I was satisfied with the model, I used it to predict the clutch score of players based on their statistics from the start of the 2023-2024 season to the current point of the 2024-2025 season.  
