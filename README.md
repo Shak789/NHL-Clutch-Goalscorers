@@ -9,7 +9,12 @@ I needed to scrape data from the NHL API and Natural Stat Trick. The NHL API off
 I merged data from the NHL API and Natural Stat Trick, then ensured the data was accurate and filtered appropriately.
 
 ### 3. Establishing a Definition of Clutch
-I computed "clutch score" for each player: goals when game is tied (30 % weight) x goals when team is down by one (30 % weight) x goals when team is up by one (20 % weight) x goals in overtime (20 % weight)
+I computed a "clutch score" for each player by weighting their goals in critical game situations:
+
+- Goals when the game is tied (30% weight)
+- Goals when the team is down by one goal (30% weight)
+- Goals when the team is up by one goal (20% weight)
+- Goals in overtime (20% weight)
 
 ### 4. Choosing features
 Regardless of the model used, Natural Stat Trick provided a good set of advanced analytics to predict a player's clutch score. These included shots, expected goals, scoring chances, Corsi and Fenwick.
