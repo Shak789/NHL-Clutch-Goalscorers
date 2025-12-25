@@ -6,7 +6,7 @@ import matplotlib.colors as mcolors
 # Load data
 @st.cache_data
 def load_data():
-    df = pd.read_excel("C:\\Users\\Work\\Desktop\\clutch.xlsx")
+    df = pd.read_excel("clutch.xlsx")
     df['teamAbbrevs'] = df['teamAbbrevs'].apply(lambda x: x.split(',')[0].strip() if ',' in x else x)
     df['headshot'] = 'https://assets.nhle.com/mugs/nhl/20242025/' + df['teamAbbrevs'] + '/' + df['playerId'].astype(str) + '.png'
     df['logo'] = 'https://assets.nhle.com/logos/nhl/svg/' + df['teamAbbrevs'] + '_dark.svg'
