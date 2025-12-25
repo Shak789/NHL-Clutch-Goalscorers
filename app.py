@@ -113,7 +113,7 @@ with tab1:
 
     col_left, col_right = st.columns([2.5, 1])  # left column smaller
     with col_left:
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig)
     with col_right:
         st.write("")  
         
