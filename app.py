@@ -6,8 +6,8 @@ import matplotlib.colors as mcolors
 
 def load_data():
     BASE_DIR = Path(__file__).resolve().parent
-    file_path = BASE_DIR / "clutch.xlsx"
-    return pd.read_excel(file_path)
+    file_path = BASE_DIR / "clutch.csv"
+    return pd.read_csv(file_path)
 
 # Load data
 
