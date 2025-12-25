@@ -1,18 +1,20 @@
+from pathlib import Path
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import matplotlib.colors as mcolors
 
-# Load data
-@st.cache_data
 def load_data():
-    df = pd.read_excel("clutch.xlsx")
-    df['teamAbbrevs'] = df['teamAbbrevs'].apply(lambda x: x.split(',')[0].strip() if ',' in x else x)
-    df['headshot'] = 'https://assets.nhle.com/mugs/nhl/20242025/' + df['teamAbbrevs'] + '/' + df['playerId'].astype(str) + '.png'
-    df['logo'] = 'https://assets.nhle.com/logos/nhl/svg/' + df['teamAbbrevs'] + '_dark.svg'
-    return df
+    BASE_DIR = Path(__file__).resolve().parent
+    file_path = BASE_DIR / "clutch.xlsx"
+    return pd.read_excel(file_path)
+
+# Load data
 
 df = load_data()
+df['teamAbbrevs'] = df['teamAbbrevs'].apply(lambda x: x.split(',')[0].strip() if ',' in x else x)
+df['headshot'] = 'https://assets.nhle.com/mugs/nhl/20242025/' + df['teamAbbrevs'] + '/' + df['playerId'].astype(str) + '.png'
+df['logo'] = 'https://assets.nhle.com/logos/nhl/svg/' + df['teamAbbrevs'] + '_dark.svg'
 
 tab1, tab2 = st.tabs(["Player Profile", "Full Rankings"])
 
