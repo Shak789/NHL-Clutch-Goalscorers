@@ -5,9 +5,7 @@ import plotly.graph_objects as go
 import matplotlib.colors as mcolors
 
 def load_data():
-    BASE_DIR = Path(__file__).resolve().parent
-    file_path = BASE_DIR / "clutch.csv"
-    return pd.read_csv(file_path)
+    return pd.read_csv("clutch.csv")
 
 # Load data
 
