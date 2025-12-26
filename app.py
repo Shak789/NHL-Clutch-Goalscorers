@@ -71,7 +71,7 @@ with tab1:
     player_data = df[df['Player'] == player_name].iloc[0]
 
     with col2:
-        st.image(player_data['logo'], width=100)
+        st.image(player_data['logo'], width=400)
 
 
     col_info, col_other = st.columns([2,1])  # Make col_info wider
