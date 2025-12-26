@@ -4,50 +4,6 @@ import pandas as pd
 import plotly.graph_objects as go
 import matplotlib.colors as mcolors
 
-st.set_page_config(
-    page_title="NHL Clutch Scorer",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
-
-
-
-st.markdown("""
-<style>
-    /* Mobile responsive adjustments */
-    @media (max-width: 768px) {
-        .main .block-container {
-            padding: 1rem 0.5rem;
-        }
-        h1 {
-            font-size: 1.8rem !important;
-        }
-        h2 {
-            font-size: 1.3rem !important;
-        }
-        h3 {
-            font-size: 1.1rem !important;
-        }
-        /* Stack metrics vertically on mobile */
-        [data-testid="column"] {
-            width: 100% !important;
-            flex: 100% !important;
-        }
-    }
-    
-    /* Make tables scrollable */
-    .dataframe-container {
-        overflow-x: auto;
-    }
-    
-    /* Responsive images */
-    img {
-        max-width: 100%;
-        height: auto;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 def load_data():
     return pd.read_csv("clutch.csv")
 
@@ -71,7 +27,7 @@ with tab1:
     player_data = df[df['Player'] == player_name].iloc[0]
 
     with col2:
-        st.image(player_data['logo'], width=400)
+        st.image(player_data['logo'], width=500)
 
 
     col_info, col_other = st.columns([2,1])  # Make col_info wider
