@@ -27,7 +27,7 @@ with tab1:
     player_data = df[df['Player'] == player_name].iloc[0]
 
     with col2:
-        st.image(player_data['logo'], width=500)
+        st.image(player_data['logo'], width = 500)  # Changed from width=500
 
 
     col_info, col_other = st.columns([2,1])  # Make col_info wider
@@ -48,50 +48,49 @@ with tab1:
             of the 2025-2026 season. Only players with 20+ total goals are displayed.
             """)
 
-    if st.session_state.get('mobile', False):  # Add mobile detection
-        st.image(player_data['headshot'], use_column_width=True)
-    else:
+
+
     # Main layout - use container_width for better mobile
-        col_left, col_right = st.columns([1, 2])
+    col_left, col_right = st.columns([1, 2])
 
-        with col_left:
-            st.image(player_data['headshot'])  # More responsive
+    with col_left:
+        st.image(player_data['headshot'])  # More responsive
 
-        with col_right:
-            # Metrics
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                st.metric("Predicted", f"{player_data['predicted_clutch_score_adjusted']:.2f}")
-            
-            with col2:
-                st.metric("Current", f"{player_data['log_adjusted']:.2f}")
-            
-            with col3:
-                residual_pct = ((player_data['log_adjusted'] - player_data['predicted_clutch_score_adjusted']) / 
-                                player_data['predicted_clutch_score_adjusted'] * 100)
-                st.metric("Difference", f"{residual_pct:.2f}%", delta=f"{residual_pct:.2f}%")
-            
-            st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
-            
-            col_rank, col_tier = st.columns(2)
-            
-            with col_rank:
-                rank = (df['log_adjusted'] > player_data['log_adjusted']).sum() + 1
-                st.markdown(f"<h2 style='margin:0;'>{rank}</h2>", unsafe_allow_html=True)
-                st.markdown("*Clutch Ranking*")
-            
-            def percentile_to_color(percentile):
-                norm_value = percentile / 100
-                cmap = mcolors.LinearSegmentedColormap.from_list("", ["#e74c3c", "#f39c12", "#2ecc71"])
-                rgba = cmap(norm_value)
-                return mcolors.rgb2hex(rgba)
-            
-            with col_tier:
-                percentile = ((len(df) - rank) / len(df) * 100)
-                color = percentile_to_color(percentile)
-                st.markdown(f"<h2 style='color: {color}; font-weight: bold; margin:0;'>{round(percentile, 2)}%</h2>", unsafe_allow_html=True)
-                st.markdown("*Percentile*")
+    with col_right:
+        # Metrics
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("Predicted", f"{player_data['predicted_clutch_score_adjusted']:.2f}")
+        
+        with col2:
+            st.metric("Current", f"{player_data['log_adjusted']:.2f}")
+        
+        with col3:
+            residual_pct = ((player_data['log_adjusted'] - player_data['predicted_clutch_score_adjusted']) / 
+                            player_data['predicted_clutch_score_adjusted'] * 100)
+            st.metric("Difference", f"{residual_pct:.2f}%", delta=f"{residual_pct:.2f}%")
+        
+        st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
+        
+        col_rank, col_tier = st.columns(2)
+        
+        with col_rank:
+            rank = (df['log_adjusted'] > player_data['log_adjusted']).sum() + 1
+            st.markdown(f"<h2 style='margin:0;'>{rank}</h2>", unsafe_allow_html=True)
+            st.markdown("*Clutch Ranking*")
+        
+        def percentile_to_color(percentile):
+            norm_value = percentile / 100
+            cmap = mcolors.LinearSegmentedColormap.from_list("", ["#e74c3c", "#f39c12", "#2ecc71"])
+            rgba = cmap(norm_value)
+            return mcolors.rgb2hex(rgba)
+        
+        with col_tier:
+            percentile = ((len(df) - rank) / len(df) * 100)
+            color = percentile_to_color(percentile)
+            st.markdown(f"<h2 style='color: {color}; font-weight: bold; margin:0;'>{round(percentile, 2)}%</h2>", unsafe_allow_html=True)
+            st.markdown("*Percentile*")
         
         # Pie chart
 
@@ -163,4 +162,3 @@ with tab2:
         },
         hide_index=False
     )
-
