@@ -1,5 +1,3 @@
-# Predicting Clutch Goalscorers in the NHL
-
 This project applies machine learning to identify and predict NHL forwards who excel in “clutch” situations (close, tied, and overtime games). The goal is not only to measure  clutch performance but to model expected clutch scoring given a player’s underlying metrics.
 
 ### 1. Data Sources
@@ -15,7 +13,7 @@ I computed a "clutch score" for each player by weighting their goals in critical
 - Goals per game when the game is tied (35% weight)
 - Goals per game in overtime (20% weight)
 
-Goals when the team is down by one goal received the highest wegiht because situations where the team is down by one goal are more high pressure than when the game is tied. Goals in overtime received the lowest weight because not all games finish in overtime. Overtime is at 3v3, which is different from regular play.
+Goals when the team is down by one goal received the highest weight because situations where the team is down by one goal are more high pressure than when the game is tied. Goals in overtime received the lowest weight because not all games finish in overtime. Overtime is at 3v3, which is different from regular play.
 
 ### 3. Building a Classification Model
 I first tried classification since it seemed logical to classify players as "clutch" and "non-clutch". I set thresholds for the clutch score and trained an XGBoost model on data from the 2020-2021 to the 2023-2024 NHL season. The model used various underlying performance metrics such as expected goals, high-danger scoring chances, shot attempts. While the model was successful in identifying elite players and those below average, it struggled with players who fell near the classification boundaries, where small differences in their stats made it difficult to confidently label them as clutch or non-clutch. 
