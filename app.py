@@ -8,6 +8,10 @@ import matplotlib.colors as mcolors
 def load_data():
     return pd.read_csv("clutch.csv")
 
+import streamlit as st
+st.title("🚨 DEPLOY TEST - SHOULD CHANGE")
+
+
 # Load data
 
 df = load_data()
