@@ -21,7 +21,7 @@ I first tried classification since it seemed logical to classify players as "clu
 ### 4. Switching to a Regression Model
 Linear regression was a more feasible approach since many of the features were strongly correlated with a clutch score. It would be easier to predict a player's clutch score rather than assigning the player an ambiguous label.  
 
-However, there was multicollinearity among features, which would lead to instability in coefficients and make it difficult to interpret the impact of features on the clutch score. Therefore, a small subset of features were kept (scoring chances, assists, time on ice, rebounds created). 
+However, there was multicollinearity among features, which would lead to instability in coefficients and make it difficult to interpret the impact of features on the clutch score. Therefore, a small subset of features were kept (scoring chances, assists, time on ice, rebounds created, offensive zone starts). 
 
 I also refined the model by using Ridge regression and performed cross-validation to ensure there was less overfitting.
 
