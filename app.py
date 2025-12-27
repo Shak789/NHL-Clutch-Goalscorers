@@ -2,6 +2,7 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 import matplotlib.colors as mcolors
 
 def load_data():
@@ -13,6 +14,15 @@ df = load_data()
 df['teamAbbrevs'] = df['teamAbbrevs'].apply(lambda x: x.split(',')[0].strip() if ',' in x else x)
 df['headshot'] = 'https://assets.nhle.com/mugs/nhl/20242025/' + df['teamAbbrevs'] + '/' + df['playerId'].astype(str) + '.png'
 df['logo'] = 'https://assets.nhle.com/logos/nhl/svg/' + df['teamAbbrevs'] + '_dark.svg'
+
+
+def format_top_features(row):
+        shap_cols = [c for c in row.index if c.startswith('shap_')]
+        impacts = row[shap_cols].abs().sort_values(ascending=False).head(3)
+        features = [col.replace('shap_', '').replace('_per_game', '') for col in impacts.index]
+        return ', '.join(features)
+
+df['key_factors'] = df.apply(format_top_features, axis=1)
 
 tab1, tab2 = st.tabs(["Player Profile", "Full Rankings"])
 
@@ -40,10 +50,10 @@ with tab1:
             - **Down by 1** (40%)  
             - **Overtime** (20%)  
 
-            A predictive model uses various underlying performance metrics (e.g. expected goals, high-danger scoring chances, shot attempts)
+            A predictive model uses various underlying performance metrics (scoring chances, assists, time on ice, rebounds created)
             to predict a player's clutch score. The model’s **expected clutch score** can then be compared 
-            to a player’s **actual clutch score** to determine whether they are **exceeding or underperforming expectations**. Players exceeding predictions perform better under pressure than their stats suggest.
-                    
+            to a player’s **actual clutch score** to determine whether they are **exceeding or underperforming expectations**. Players exceeding predictions perform better under pressure than their stats suggest.         
+
             Actual clutch scores reflect performance of forwards from the 2024-2025 season through the current point 
             of the 2025-2026 season. Only players with 20+ total goals are displayed.
             """)
@@ -94,29 +104,66 @@ with tab1:
         
         # Pie chart
 
-    import plotly.graph_objects as go
-    # Title with tight spacing
-    st.markdown("<h3 style='margin-top:5px; margin-bottom:5px;'>Clutch Goal Breakdown</h3>", unsafe_allow_html=True)
-    # Pie chart
-    fig = go.Figure(data=[go.Pie(
-        labels=['Down One', 'Tied', 'OT'],
-        values=[player_data['goals_down_by_one'], player_data['goals_when_tied'], player_data['ot_goals']],
-        hole=.4,
-        marker=dict(colors=['#B12E38', '#276BB0', '#660089']),
-        textfont=dict(size=15)              
-    )])
-    fig.update_layout(
-    height=200,
-    margin=dict(t=10, b=10, l=10, r=10),
-    legend=dict(font=dict(size=14))      # Increase legend font size
-    )
+    col_left, col_right = st.columns(2)
 
-    col_left, col_right = st.columns([2.5, 1])  # left column smaller
     with col_left:
-        st.plotly_chart(fig)
+        st.markdown("<h4 style='margin-top:5px; margin-bottom:5px;'>Clutch Goal Breakdown</h4>", unsafe_allow_html=True)
+        fig_pie = go.Figure(data=[go.Pie(
+            labels=['Down One', 'Tied', 'OT'],
+            values=[player_data['goals_down_by_one'], player_data['goals_when_tied'], player_data['ot_goals']],
+            hole=.4,
+            marker=dict(colors=['#B12E38', '#276BB0', '#660089']),
+            textfont=dict(size=15),
+            textposition='inside',
+            textinfo='percent',
+            hovertemplate='<b>%{label}</b><br>%{value} goals<br>%{percent}<extra></extra>'              
+        )])
+        fig_pie.update_layout(
+            height=200,
+            margin=dict(t=10, b=10, l=10, r=10),
+            legend=dict(font=dict(size=14))
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
+
     with col_right:
-        st.write("")  
+        st.markdown("<h4 style='margin-top:5px; margin-bottom:5px;'>Feature Impact on Prediction</h4>", unsafe_allow_html=True)
+        shap_cols = [c for c in player_data.index if c.startswith('shap_')]
+        feature_impacts = player_data[shap_cols].abs().sort_values(ascending=False)
+        feature_impacts.index = feature_impacts.index.str.replace('shap_', '').str.replace('_per_game', '')
         
+        feature_names = {
+            'iSCF': 'Scoring Chances',
+            'ixG': 'Expected Goals',
+            'iCF': 'Shot Attempts',
+            'iFF': 'Unblocked Shot Attempts',
+            'iHDCF': 'High-Danger Chances',
+            'shots': 'Shots',
+            'assists': 'Assists',
+            'time_on_ice': 'Ice Time',
+            'rebounds_created': 'Rebounds Created'
+        }
+        feature_impacts.index = feature_impacts.index.map(lambda x: feature_names.get(x, x))
+        
+        fig_bar = px.bar(x=feature_impacts.values, y=feature_impacts.index, 
+                        orientation='h')
+       
+        feature_impacts_pct = (feature_impacts / feature_impacts.sum()) * 100
+        fig_bar = px.bar(x=feature_impacts_pct.values, y=feature_impacts_pct.index, 
+                 orientation='h')
+        fig_bar.update_traces(
+            marker_color='#4A90E2',
+            hovertemplate='<b>%{y}</b><br>Impact: %{x:.2f}%<extra></extra>'
+        )
+        fig_bar.update_layout(
+            height=250,
+            margin=dict(t=10, b=10, l=10, r=10),
+            showlegend=False,
+            xaxis_title="Relative Importance (%)",
+            yaxis_title="Feature",
+        )
+        st.plotly_chart(fig_bar)
+    
+            
     st.caption("Data retrieved from the NHL API and Natural Stat Trick") 
     
 
@@ -134,8 +181,7 @@ with tab2:
 
     
     # Prepare display dataframe
-    display_df = df[['Player', 'teamAbbrevs', 'predicted_clutch_score_adjusted', 
-                     'log_adjusted', 'interval', 'headshot', 'logo']].copy()
+    display_df = df.copy()
     
     
     display_df['residual_pct'] = ((display_df['log_adjusted'] - display_df['predicted_clutch_score_adjusted']) / 
@@ -145,20 +191,36 @@ with tab2:
     display_df.index += 1  # Start ranking at 1
     
     # Display with images (requires custom HTML or st.dataframe with column config)
+
+    feature_names = {
+    'shap_iSCF_per_game': 'Scoring Chances Impact',
+    'shap_assists_per_game': 'Assists Impact',
+    'shap_time_on_ice_per_game': 'Ice Time Impact',
+    'shap_rebounds_created_per_game': 'Rebounds Impact'
+    }
+    
+    # Add renamed SHAP columns to display
+    shap_display_cols = {}
+    for old_name, new_name in feature_names.items():
+        if old_name in display_df.columns:
+            # Convert to percentage
+            display_df[f'{old_name}_pct'] = display_df[old_name] * 100
+            shap_display_cols[f'{old_name}_pct'] = st.column_config.NumberColumn(
+                new_name,
+                format="%.2f%%"
+            )
+
     st.dataframe(
         display_df[['Player', 'teamAbbrevs', 'predicted_clutch_score_adjusted', 
-                    'log_adjusted', 'residual_pct', 'interval']],
+                    'log_adjusted', 'residual_pct', 'interval'] + [f'{k}_pct' for k in feature_names.keys()]],
         column_config={
             "Player": "Player",
             "teamAbbrevs": "Team",
             "predicted_clutch_score_adjusted": "Predicted",
             "log_adjusted": "Actual",
-            "residual_pct": st.column_config.NumberColumn(
-                "Difference",
-                format="%.2f%%"
-            ),
-            "interval": "Predicted Clutch Score Range"
-
+            "residual_pct": st.column_config.NumberColumn("Difference", format="%.2f%%"),
+            "interval": "Predicted Score Range",
+            **shap_display_cols
         },
         hide_index=False
     )
