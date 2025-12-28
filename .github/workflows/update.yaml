@@ -1,0 +1,36 @@
+name: Run Python Script
+
+on:
+  push:                  # Runs on every push to main branch
+    branches:
+      - main
+  schedule:              # Runs daily at 9 AM GMT-5
+    - cron: '0 14 * * *'
+  workflow_dispatch:      # Optional: allows manual triggering from GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+
+      - name: Run script
+        run: python model.py
