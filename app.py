@@ -7,6 +7,26 @@ import matplotlib.colors as mcolors
 import os
 from datetime import datetime
 
+st.markdown("""
+<style>
+@media only screen and (max-width: 768px) {
+    .mobile-notice {
+        display: block !important;
+    }
+}
+@media only screen and (min-width: 769px) {
+    .mobile-notice {
+        display: none !important;
+    }
+}
+</style>
+<div class="mobile-notice">
+    <p style="background-color: #d4edda; padding: 10px; border-radius: 5px;">
+        📱 Rotate to landscape for best experience
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
 
 def load_data():
     return pd.read_csv("clutch.csv")
