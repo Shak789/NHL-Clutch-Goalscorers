@@ -59,6 +59,8 @@ with tab1:
 
             Actual clutch scores reflect performance of forwards from the 2024-2025 season through the current point 
             of the 2025-2026 season. Only players with 20+ total goals are displayed.
+                     
+            The full model can be viewed on [GitHub](https://github.com/Shak789/NHL-Clutch-Goalscorers).
             """)
 
 
@@ -171,7 +173,7 @@ with tab1:
     st.caption("Data retrieved from the NHL API and Natural Stat Trick.") 
     file_time = os.path.getmtime('clutch.csv')
     last_updated = datetime.fromtimestamp(file_time)
-    st.caption(f"Data last updated: {last_updated.strftime('%Y-%m-%d')}.")
+    st.caption(f"Data last updated: {last_updated.strftime('%Y-%m-%d')}. Dashboard refreshed daily at 9:00 a.m. EST.")
 
     
 

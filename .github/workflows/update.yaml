@@ -1,9 +1,9 @@
 name: Run Python Script
 
 on:
-  push:                  # Runs on every push to main branch
-    branches:
-      - main
+  #push:                  # Runs on every push to main branch
+  #  branches:
+  #    - main
   schedule:              # Runs daily at 9 AM GMT-5
     - cron: '0 14 * * *'
   workflow_dispatch:      # Optional: allows manual triggering from GitHub

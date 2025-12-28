@@ -1,6 +1,6 @@
 This project applies machine learning to identify and predict NHL forwards who excel in “clutch” situations (close, tied, and overtime games). The goal is not only to measure  clutch performance but to model expected clutch scoring given a player’s underlying metrics.
 
-[Dashboard](https://shak789-nhl-clutch-goalscorers-app-dpjtq2.streamlit.app/)
+The final model has been deployed to a [Streamlit Dashboard](https://shak789-nhl-clutch-goalscorers-app-dpjtq2.streamlit.app/) that is updated at 9:00 a.m. EST daily.
 
 ### 1. Data Sources
 * NHL API: Player biographical information and traditional goal statistics
