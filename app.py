@@ -7,13 +7,9 @@ import matplotlib.colors as mcolors
 import os
 from datetime import datetime
 
-file_time = os.path.getmtime('clutch.csv')
-last_updated = datetime.fromtimestamp(file_time)
-st.caption(f"Data last updated: {last_updated.strftime('%Y-%m-%d')}")
 
 def load_data():
     return pd.read_csv("clutch.csv")
-
 
 # Load data
 
@@ -173,6 +169,10 @@ with tab1:
     
             
     st.caption("Data retrieved from the NHL API and Natural Stat Trick") 
+    file_time = os.path.getmtime('clutch.csv')
+    last_updated = datetime.fromtimestamp(file_time)
+    st.caption(f"Data last updated: {last_updated.strftime('%Y-%m-%d')}")
+
     
 
 with tab2:
