@@ -30,7 +30,7 @@ However, there was multicollinearity among features, which would lead to instabi
 The model was refined using Ridge regression and cross-validation to ensure there was less overfitting.
 
 #### Dealing with Outliers
-Cook's distance helped identify influential points. The model underpredicted the clutch score of elite players because their feature stats set a "ceiling" for their clutch ability. The model also overestimated some elite players who had strong underlying metrics but did not perform well in clutch games. In addition, the model struggled with below-average players who scored clutch goals at a rate that did not match their advanced stats.  This prompted resulted in a log transformation on the clutch score, which enabled the model to generate better predictions for elite players and reduced the number of influential points. 
+Cook's distance helped identify influential points. The model underpredicted the clutch score of elite players because their feature stats set a "ceiling" for their clutch ability. The model also overestimated some elite players who had strong underlying metrics but did not perform well in clutch games. In addition, the model struggled with below-average players who scored clutch goals at a rate that did not match their advanced stats.  This resulted in a log transformation on the clutch score, which enabled the model to generate better predictions for elite players and reduced the number of influential points. 
 
 After the transformation, the model still undervalued some players who performed better in close and tied situations than their metrics suggest. While influential points are often viewed negatively, they can show which players perform better under pressure than their stats suggest. 
 

@@ -74,7 +74,7 @@ with tab1:
             - **Overtime** (20%)  
 
             A predictive model uses various underlying performance metrics (scoring chances, assists, time on ice, rebounds created, offensive zone starts)
-            to predict a player's clutch score. The model’s **expected clutcfh score** can then be compared 
+            to predict a player's clutch score. The model’s **expected clutch score** can then be compared 
             to a player’s **actual clutch score** to determine whether they are **exceeding or underperforming expectations**. Players exceeding predictions perform better under pressure than their stats suggest.         
 
             Actual clutch scores reflect performance of forwards from the 2024-2025 season through the current point 
