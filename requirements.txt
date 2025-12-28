@@ -6,6 +6,6 @@ numpy
 openpyxl
 requests
 functools
-sklearn
+scikit-learn
 shap
 joblib
