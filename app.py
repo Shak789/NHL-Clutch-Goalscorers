@@ -13,7 +13,7 @@ def load_data():
 
 df = load_data()
 df['teamAbbrevs'] = df['teamAbbrevs'].apply(lambda x: x.split(',')[0].strip() if ',' in x else x)
-df['headshot'] = 'https://assets.nhle.com/mugs/nhl/20242025/' + df['teamAbbrevs'] + '/' + df['playerId'].astype(str) + '.png'
+df['headshot'] = 'https://assets.nhle.com/mugs/nhl/20252026/' + df['teamAbbrevs'] + '/' + df['playerId'].astype(str) + '.png'
 df['logo'] = 'https://assets.nhle.com/logos/nhl/svg/' + df['teamAbbrevs'] + '_dark.svg'
 
 
@@ -25,7 +25,7 @@ def format_top_features(row):
 
 df['key_factors'] = df.apply(format_top_features, axis=1)
 
-tab1, tab2 = st.tabs(["Player Profile", "Full Rankings"])
+tab1, tab2, tab3 = st.tabs(["Player Profile", "Full Rankings", "Model Performance"])
 
 with tab1:
 
@@ -41,7 +41,7 @@ with tab1:
         st.image(player_data['logo'], width = 500)  # Changed from width=500
 
 
-    col_info, col_other = st.columns([2,1])  # Make col_info wider
+    col_info, col_other = st.columns([2.5,1])  # Make col_info wider
     with col_info:
         with st.expander("ℹ️ About Clutch Score"):
             st.write("""
@@ -51,8 +51,8 @@ with tab1:
             - **Down by 1** (40%)  
             - **Overtime** (20%)  
 
-            A predictive model uses various underlying performance metrics (scoring chances, assists, time on ice, rebounds created)
-            to predict a player's clutch score. The model’s **expected clutch score** can then be compared 
+            A predictive model uses various underlying performance metrics (scoring chances, assists, time on ice, rebounds created, offensive zone starts)
+            to predict a player's clutch score. The model’s **expected clutcfh score** can then be compared 
             to a player’s **actual clutch score** to determine whether they are **exceeding or underperforming expectations**. Players exceeding predictions perform better under pressure than their stats suggest.         
 
             Actual clutch scores reflect performance of forwards from the 2024-2025 season through the current point 
@@ -108,7 +108,7 @@ with tab1:
     col_left, col_right = st.columns(2)
 
     with col_left:
-        st.markdown("<h4 style='margin-top:5px; margin-bottom:5px;'>Clutch Goal Breakdown</h4>", unsafe_allow_html=True)
+        st.markdown("<h5 style='margin-top:5px; margin-bottom:5px;'>Clutch Goal Breakdown</h5>", unsafe_allow_html=True)
         fig_pie = go.Figure(data=[go.Pie(
             labels=['Down One', 'Tied', 'OT'],
             values=[player_data['goals_down_by_one'], player_data['goals_when_tied'], player_data['ot_goals']],
@@ -127,7 +127,7 @@ with tab1:
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with col_right:
-        st.markdown("<h4 style='margin-top:5px; margin-bottom:5px;'>Feature Impact on Prediction</h4>", unsafe_allow_html=True)
+        st.markdown("<h5 style='margin-top:5px; margin-bottom:5px;'>Impact of Metrics on Clutch Score</h5>", unsafe_allow_html=True)
         shap_cols = [c for c in player_data.index if c.startswith('shap_')]
         feature_impacts = player_data[shap_cols].abs().sort_values(ascending=False)
         feature_impacts.index = feature_impacts.index.str.replace('shap_', '').str.replace('_per_game', '')
@@ -141,7 +141,8 @@ with tab1:
             'shots': 'Shots',
             'assists': 'Assists',
             'time_on_ice': 'Ice Time',
-            'rebounds_created': 'Rebounds Created'
+            'rebounds_created': 'Rebounds Created',
+            'off_zone_starts': 'Offensive Zone Starts'
         }
         feature_impacts.index = feature_impacts.index.map(lambda x: feature_names.get(x, x))
         
@@ -160,7 +161,7 @@ with tab1:
             margin=dict(t=10, b=10, l=10, r=10),
             showlegend=False,
             xaxis_title="Relative Importance (%)",
-            yaxis_title="Feature",
+            yaxis_title="Metric",
         )
         st.plotly_chart(fig_bar)
     
@@ -177,12 +178,13 @@ with tab2:
     + ", "
     + df['upper_bound_log'].round(2).astype(str)
     + ")"
-)
+    )
 
-
+    
     
     # Prepare display dataframe
     display_df = df.copy()
+
     
     
     display_df['residual_pct'] = ((display_df['log_adjusted'] - display_df['predicted_clutch_score_adjusted']) / 
@@ -193,11 +195,17 @@ with tab2:
     
     # Display with images (requires custom HTML or st.dataframe with column config)
 
+    shap_cols = [c for c in player_data.index if c.startswith('shap_')]
+    feature_impacts = player_data[shap_cols].abs().sort_values(ascending=False)
+
+    print(display_df[shap_cols])
+
     feature_names = {
     'shap_iSCF_per_game': 'Scoring Chances Impact',
     'shap_assists_per_game': 'Assists Impact',
     'shap_time_on_ice_per_game': 'Ice Time Impact',
-    'shap_rebounds_created_per_game': 'Rebounds Impact'
+    'shap_rebounds_created_per_game': 'Reabounds Created Impact',
+    'shap_off_zone_starts_per_game': 'Off Zone Starts Impact'
     }
     
     # Add renamed SHAP columns to display
@@ -205,23 +213,99 @@ with tab2:
     for old_name, new_name in feature_names.items():
         if old_name in display_df.columns:
             # Convert to percentage
-            display_df[f'{old_name}_pct'] = display_df[old_name] * 100
+            display_df[f'{old_name}_pct'] = display_df[old_name].abs() / (display_df[shap_cols].abs().sum(axis = 1)) * 100
             shap_display_cols[f'{old_name}_pct'] = st.column_config.NumberColumn(
                 new_name,
                 format="%.2f%%"
             )
+    
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Player name search
+        player_search = st.text_input("Search Player Name", "")
+        
+    with col2:
+        # Team filter
+        all_teams = ['All'] + sorted(display_df['teamAbbrevs'].unique().tolist())
+        selected_team = st.selectbox("Filter by Team", all_teams)
+
+    display_df = display_df[['Player', 'teamAbbrevs', 'predicted_clutch_score_adjusted', 
+                    'log_adjusted', 'residual_pct', 'interval', 'Significantly_Clutch'] + [f'{k}_pct' for k in feature_names.keys()]]
+
+    # Apply filters
+    filtered_df = display_df.copy()
+
+    if player_search:
+        filtered_df = filtered_df[
+            filtered_df['Player'].str.contains(player_search, case=False, na=False)
+        ]
+
+    if selected_team != 'All':
+        filtered_df = filtered_df[filtered_df['teamAbbrevs'] == selected_team]
 
     st.dataframe(
-        display_df[['Player', 'teamAbbrevs', 'predicted_clutch_score_adjusted', 
-                    'log_adjusted', 'residual_pct', 'interval'] + [f'{k}_pct' for k in feature_names.keys()]],
+        filtered_df,
         column_config={
             "Player": "Player",
             "teamAbbrevs": "Team",
-            "predicted_clutch_score_adjusted": "Predicted",
-            "log_adjusted": "Actual",
+            "predicted_clutch_score_adjusted": "Predicted Score",
+            "log_adjusted": "Actual Score",
             "residual_pct": st.column_config.NumberColumn("Difference", format="%.2f%%"),
             "interval": "Predicted Score Range",
+            "Significantly_Clutch": "Inside/Outside Score Range",
             **shap_display_cols
         },
         hide_index=False
     )
+
+with tab3:
+    import plotly.express as px
+
+    # In your Streamlit app (Full Rankings tab or new Model Performance section)
+    st.subheader("Model Performance: Actual vs. Predicted")
+
+    # Create interactive scatter plot
+    fig = px.scatter(
+        df,
+        x='log_adjusted',
+        y='predicted_clutch_score_adjusted',
+        hover_data=['Player', 'teamAbbrevs'],
+        labels={
+            'log_adjusted': 'Actual Clutch Score',
+            'predicted_clutch_score_adjusted': 'Predicted Clutch Score'
+        },
+        title='Actual vs. Predicted Clutch Performance'
+    )
+
+    # Add diagonal reference line
+    fig.add_scatter(
+        x=[df['log_adjusted'].min(), 
+        df['log_adjusted'].max()],
+        y=[df['log_adjusted'].min(), 
+        df['log_adjusted'].max()],
+        mode='lines',
+        line=dict(color='red', width=2),
+        name='Perfect Prediction',
+        showlegend=False
+    )
+
+    # Style
+    fig.update_traces(
+    hovertemplate='<b>%{customdata[0]}</b><br>' +
+                  'Team: %{customdata[1]}<br>' +
+                  'Actual: %{x:.2f}<br>' +
+                  'Predicted: %{y:.2f}<br>' +
+                  '<extra></extra>'
+    )
+    fig.update_layout(
+        height=600,
+        hovermode='closest'
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Add R² metric below
+    st.metric("Model R²", "0.70", help="Model explains 70% of variance in clutch performance. 70% of the changes in" \
+    "clutch score are accounted for by the model's features while the remaining 30% cannot be explained due to players " \
+    "exceeding or underperforming expectations.")

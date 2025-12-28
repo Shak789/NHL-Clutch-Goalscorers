@@ -4,3 +4,8 @@ plotly
 matplotlib
 numpy
 openpyxl
+requests
+functools
+sklearn
+shap
+joblib
