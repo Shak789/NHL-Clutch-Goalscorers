@@ -27,7 +27,7 @@ def format_top_features(row):
 
 df['key_factors'] = df.apply(format_top_features, axis=1)
 
-tab1, tab2, tab3 = st.tabs(["Player Profile", "Full Rankings", "Model Performance"])
+tab1, tab2, tab3, tab4 = st.tabs(["Player Profile", "Full Rankings", "Model Performance", "Methodology"])
 
 with tab1:
 
@@ -317,3 +317,7 @@ with tab3:
     st.metric("Model R²", "0.70", help="Model explains 70% of variance in clutch performance. 70% of the changes in " \
     "clutch score are accounted for by the model's features while the remaining 30% cannot be explained due to players " \
     "exceeding or underperforming expectations.")
+
+with tab4:
+    with open("README.md", "r", encoding="utf-8") as f:
+        st.markdown(f.read())
