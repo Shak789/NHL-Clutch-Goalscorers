@@ -5,7 +5,6 @@ matplotlib
 numpy
 openpyxl
 requests
-functools
 scikit-learn
 shap
 joblib
