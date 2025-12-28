@@ -1,3 +1,5 @@
+## Predicting NHL Clutch Goalscorers
+
 This project applies machine learning to identify and predict NHL forwards who excel in “clutch” situations (close, tied, and overtime games). The goal is not only to measure  clutch performance but to model expected clutch scoring given a player’s underlying metrics.
 
 ### 1. Data Sources
