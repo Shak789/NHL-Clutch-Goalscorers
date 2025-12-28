@@ -168,10 +168,10 @@ with tab1:
         st.plotly_chart(fig_bar)
     
             
-    st.caption("Data retrieved from the NHL API and Natural Stat Trick") 
+    st.caption("Data retrieved from the NHL API and Natural Stat Trick.") 
     file_time = os.path.getmtime('clutch.csv')
     last_updated = datetime.fromtimestamp(file_time)
-    st.caption(f"Data last updated: {last_updated.strftime('%Y-%m-%d')}")
+    st.caption(f"Data last updated: {last_updated.strftime('%Y-%m-%d')}.")
 
     
 
@@ -312,6 +312,6 @@ with tab3:
     st.plotly_chart(fig, use_container_width=True)
 
     # Add R² metric below
-    st.metric("Model R²", "0.70", help="Model explains 70% of variance in clutch performance. 70% of the changes in" \
+    st.metric("Model R²", "0.70", help="Model explains 70% of variance in clutch performance. 70% of the changes in " \
     "clutch score are accounted for by the model's features while the remaining 30% cannot be explained due to players " \
     "exceeding or underperforming expectations.")
