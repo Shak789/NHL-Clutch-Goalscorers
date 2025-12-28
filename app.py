@@ -69,8 +69,8 @@ with tab1:
             st.write("""
             **Clutch Score** weights goals scored in critical game situations:
 
-            - **Tied games** (40%)  
-            - **Down by 1** (40%)  
+            - **Tied games** (45%)  
+            - **Down by 1** (35%)  
             - **Overtime** (20%)  
 
             A predictive model uses various underlying performance metrics (scoring chances, assists, time on ice, rebounds created, offensive zone starts)
