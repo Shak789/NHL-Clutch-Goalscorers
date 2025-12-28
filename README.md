@@ -34,7 +34,7 @@ After the transformation, the model still undervalued some players who performed
 95% prediction intervals were generated for each player. If actual clutch scores fall outside the intervals, this indicates that clutch performance is significantly different from expectations. The intervals are generated using a bootstrap procedure with resampled residual noise, which ensures that the intervals reflect randomness in clutch performance.
 
 ### 7. Shap Values
-SHAP values were calculated to explain which features most influenced each player's prediction.
+SHAP values were calculated to explain which features most influenced each player's prediction. This is useful for the dashboard since users can understand how clutch scores are predicted. 
 
 ### 8. Using the Model on a Final Test Set
 The model was tested on player data from the 2024-2025 season to the current point of the 2025-2026 season. The R² of 70% indicates the model explains 70% of variance in clutch performance, which is strong given the inherent randomness in clutch situations. 
