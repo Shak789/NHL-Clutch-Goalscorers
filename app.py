@@ -4,6 +4,12 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import matplotlib.colors as mcolors
+import os
+from datetime import datetime
+
+file_time = os.path.getmtime('clutch.csv')
+last_updated = datetime.fromtimestamp(file_time)
+st.caption(f"Data last updated: {last_updated.strftime('%Y-%m-%d')}")
 
 def load_data():
     return pd.read_csv("clutch.csv")
