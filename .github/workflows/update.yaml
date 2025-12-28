@@ -5,7 +5,7 @@ on:
   #  branches:
   #    - main
   schedule:              # Runs daily at 9 AM GMT-5
-    - cron: '0 14 * * *'
+    - cron: '30 13 * * *'
   workflow_dispatch:      # Optional: allows manual triggering from GitHub
 
 permissions:

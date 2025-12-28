@@ -60,7 +60,7 @@ with tab1:
             Actual clutch scores reflect performance of forwards from the 2024-2025 season through the current point 
             of the 2025-2026 season. Only players with 20+ total goals are displayed.
                      
-            The full model can be viewed on [GitHub](https://github.com/Shak789/NHL-Clutch-Goalscorers).
+            For details on the model, see the *Methodology* tab above
             """)
 
 
@@ -128,7 +128,7 @@ with tab1:
             margin=dict(t=10, b=10, l=10, r=10),
             legend=dict(font=dict(size=14))
         )
-        st.plotly_chart(fig_pie, use_container_width=True)
+        st.plotly_chart(fig_pie)
 
     with col_right:
         st.markdown("<h5 style='margin-top:5px; margin-bottom:5px;'>Impact of Metrics on Clutch Score</h5>", unsafe_allow_html=True)
@@ -205,8 +205,6 @@ with tab2:
 
     shap_cols = [c for c in player_data.index if c.startswith('shap_')]
     feature_impacts = player_data[shap_cols].abs().sort_values(ascending=False)
-
-    print(display_df[shap_cols])
 
     feature_names = {
     'shap_iSCF_per_game': 'Scoring Chances Impact',
@@ -311,7 +309,7 @@ with tab3:
         hovermode='closest'
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig)
 
     # Add R² metric below
     st.metric("Model R²", "0.70", help="Model explains 70% of variance in clutch performance. 70% of the changes in " \
