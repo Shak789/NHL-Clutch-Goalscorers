@@ -31,7 +31,7 @@ I used Cook's distance to identify influential points. The model underpredicted 
 After the transformation, the model still undervalued some players who performed better in close and tied situations than their metrics suggest. While influential points are often viewed negatively, they can show which players perform better under pressure than their stats suggest. 
 
 ### 6. Prediction Intervals
-95% prediction intervals were generated for each player. If actual clutch scores fall outside the intervals, this indicates that clutch performance is significantly different from expectations.
+95% prediction intervals were generated for each player. If actual clutch scores fall outside the intervals, this indicates that clutch performance is significantly different from expectations. The intervals are generated using a bootstrap procedure with resampled residual noise, which ensures that the intervals reflect randomness in clutch performance.
 
 ### 7. Shap Values
 SHAP values were calculated to explain which features most influenced each player's prediction.
