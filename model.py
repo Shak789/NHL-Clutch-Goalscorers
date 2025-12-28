@@ -48,7 +48,7 @@ if all_seasons:
             'teamAbbrevs': 'last'
         }).reset_index(drop = True)
     
-nhl_api_df = nhl_api_df.loc[(nhl_api_df['positionCode'] != 'D') & (nhl_api_df['gamesPlayed'] >= 100)]
+nhl_api_df = nhl_api_df.loc[(nhl_api_df['positionCode'] != 'D') & (nhl_api_df['gamesPlayed'] >= 40)]
 nhl_api_df = nhl_api_df.reset_index(drop = True)
 
 rename_columns = {

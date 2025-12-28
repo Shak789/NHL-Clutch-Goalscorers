@@ -286,14 +286,34 @@ with tab2:
     )
 
 with tab3:
-    import plotly.express as px
+
+    col1new, col2new = st.columns(2)
+
+    with col1new:
+        # Player name search
+        player_search = st.text_input("Search Player Name", "", key="player_search_input")
+    
+    with col2new:
+        # Team filter
+        all_teams = ['All'] + sorted(display_df['teamAbbrevs'].unique().tolist())
+        selected_team = st.selectbox("Filter by Team", all_teams, key="team_filter_selectbox")
 
     # In your Streamlit app (Full Rankings tab or new Model Performance section)
     st.subheader("Model Performance: Actual vs. Predicted")
 
+    filtered_df = df.copy()
+
+    # Filter by player name (case-insensitive)
+    if player_search:
+        filtered_df = filtered_df[filtered_df['Player'].str.contains(player_search, case=False, na=False)]
+
+    # Filter by team
+    if selected_team != 'All':
+        filtered_df = filtered_df[filtered_df['teamAbbrevs'] == selected_team]
+
     # Create interactive scatter plot
     fig = px.scatter(
-        df,
+        filtered_df,
         x='log_adjusted',
         y='predicted_clutch_score_adjusted',
         hover_data=['Player', 'teamAbbrevs'],
@@ -332,8 +352,8 @@ with tab3:
     st.plotly_chart(fig)
 
     # Add R² metric below
-    st.metric("Model R²", "0.70", help="Model explains 70% of variance in clutch performance. 70% of the changes in " \
-    "clutch score are accounted for by the model's features while the remaining 30% cannot be explained due to players " \
+    st.metric("Model R²", "0.65", help="Model explains 65% of variance in clutch performance. 65% of the changes in " \
+    "clutch score are accounted for by the model's features while the remaining 35% cannot be explained due to players " \
     "exceeding or underperforming expectations.")
 
 with tab4:
