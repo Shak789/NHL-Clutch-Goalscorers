@@ -8,7 +8,7 @@ The full code for the model can be viewed [here](https://github.com/Shak789/NHL-
 * NHL API: Player biographical information and traditional goal statistics
 * Natural Stat Trick:
   - Goals scored in tied, one-goal deficit, and overtime situations
-  - Advanced performance metrics (scoring chances, assists, ice time, rebounds, offensive zone starts)
+  - Advanced performance metrics (scoring chances, assists, ice time, rebounds, offensive zone starts, shooting %)
 
 #### Establishing a Definition of Clutch
 A "clutch score" for each player is computed by weighting their goals in critical game situations:

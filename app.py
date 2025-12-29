@@ -70,10 +70,10 @@ with tab1:
             **Clutch Score** weights goals scored in critical game situations:
 
             - **Tied games** (45%)  
-            - **Down by 1** (35%)  
+            - **Team is down by 1 goal** (35%)  
             - **Overtime** (20%)  
 
-            A predictive model uses various underlying performance metrics (scoring chances, assists, time on ice, rebounds created, offensive zone starts)
+            A statistical model uses various underlying performance metrics (scoring chances, assists, time on ice, rebounds created, offensive zone starts, shooting %)
             to predict a player's clutch score. The model’s **expected clutch score** can then be compared 
             to a player’s **actual clutch score** to determine whether they are **exceeding or underperforming expectations**. Players exceeding predictions perform better under pressure than their stats suggest.         
 
@@ -166,7 +166,8 @@ with tab1:
             'assists': 'Assists',
             'time_on_ice': 'Ice Time',
             'rebounds_created': 'Rebounds Created',
-            'off_zone_starts': 'Offensive Zone Starts'
+            'off_zone_starts': 'Offensive Zone Starts',
+            'SH%': 'Shooting %'
         }
         feature_impacts.index = feature_impacts.index.map(lambda x: feature_names.get(x, x))
         
@@ -231,7 +232,8 @@ with tab2:
     'shap_assists_per_game': 'Assists Impact',
     'shap_time_on_ice_per_game': 'Ice Time Impact',
     'shap_rebounds_created_per_game': 'Reabounds Created Impact',
-    'shap_off_zone_starts_per_game': 'Off Zone Starts Impact'
+    'shap_off_zone_starts_per_game': 'Off Zone Starts Impact',
+    'shap_SH%': 'Shooting % Impact'
     }
     
     # Add renamed SHAP columns to display
@@ -352,8 +354,8 @@ with tab3:
     st.plotly_chart(fig)
 
     # Add R² metric below
-    st.metric("Model R²", "0.65", help="Model explains 65% of variance in clutch performance. 65% of the changes in " \
-    "clutch score are accounted for by the model's features while the remaining 35% cannot be explained due to players " \
+    st.metric("Model R²", "0.75", help="Model explains 75% of variance in clutch performance. 75% of the changes in " \
+    "clutch score are accounted for by the model's features while the remaining 25% cannot be explained due to players " \
     "exceeding or underperforming expectations.")
 
 with tab4:

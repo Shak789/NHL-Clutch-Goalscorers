@@ -92,7 +92,7 @@ on_ice_df.columns = on_ice_df.columns.str.replace('\xa0', ' ')
 goals_up_one_df = goals_up_one_df[['Player', 'GP', 'goals_up_by_one']]
 goals_down_one_df = goals_down_one_df[['Player', 'goals_down_by_one']]
 goals_tied_df = goals_tied_df[['Player', 'goals_when_tied']]
-total_df = total_df[['Player', 'total_goals', 'Shots', 'ixG', 'iFF', 'iSCF', 'iHDCF', 'Rebounds Created', 'iCF']]
+total_df = total_df[['Player', 'total_goals', 'Shots', 'ixG', 'iFF', 'iSCF', 'iHDCF', 'Rebounds Created', 'iCF', 'SH%']]
 on_ice_df = on_ice_df[['Player', 'Off. Zone Starts', 'On The Fly Starts']]
 
 dfs_natural_stat = [goals_up_one_df, goals_down_one_df, goals_tied_df, total_df, on_ice_df]
@@ -132,7 +132,7 @@ merged_clutch_goals_prediction['clutch_score_rank']  = merged_clutch_goals_predi
 merged_clutch_goals_prediction['clutch_score'] = merged_clutch_goals_prediction['clutch_score'].apply(lambda x: round(x, 2))
 merged_clutch_goals_prediction.sort_values('clutch_score_rank', inplace = True)
 
-x_var = ['iSCF_per_game', 'assists_per_game', 'rebounds_created_per_game', 'time_on_ice_per_game', 'off_zone_starts_per_game']
+x_var = ['iSCF_per_game', 'assists_per_game', 'rebounds_created_per_game', 'time_on_ice_per_game', 'off_zone_starts_per_game', 'SH%']
 X_adjusted = merged_clutch_goals_prediction[x_var]
 y_var = 'clutch_score'
 y = merged_clutch_goals_prediction[y_var]
