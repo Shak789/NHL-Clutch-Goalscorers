@@ -151,7 +151,7 @@ with tab1:
         st.plotly_chart(fig_pie)
 
     with col_right:
-        st.markdown("<h5 style='margin-top:5px; margin-bottom:5px;'>Impact of Metrics on Clutch Score</h5>", unsafe_allow_html=True)
+        st.markdown("<h5 style='margin-top:5px; margin-bottom:5px;'>Impact of Metrics on Predicted Clutch Score</h5>", unsafe_allow_html=True)
         shap_cols = [c for c in player_data.index if c.startswith('shap_')]
         feature_impacts = player_data[shap_cols].abs().sort_values(ascending=False)
         feature_impacts.index = feature_impacts.index.str.replace('shap_', '').str.replace('_per_game', '')
@@ -300,7 +300,6 @@ with tab3:
         all_teams = ['All'] + sorted(display_df['teamAbbrevs'].unique().tolist())
         selected_team = st.selectbox("Filter by Team", all_teams, key="team_filter_selectbox")
 
-    # In your Streamlit app (Full Rankings tab or new Model Performance section)
     st.subheader("Model Performance: Actual vs. Predicted")
 
     filtered_df = df.copy()

@@ -41,7 +41,7 @@ After the transformation, the model still undervalued some players who performed
 SHAP values were calculated to explain which features most influenced each player's prediction.
 
 #### Using the Model on a Final Test Set
-The model was tested on player data from the 2024-2025 season to the current point of the 2025-2026 season. The R² of 65% indicates the model explains 65% of variance in clutch performance, which is strong given the inherent randomness in clutch situations. 
+The model was tested on player data from the 2024-2025 season to the current point of the 2025-2026 season. The R² of 75% indicates the model explains 75% of variance in clutch performance, which is strong given the inherent randomness in clutch situations. 
 
 #### Conclusion
 Through this project, I hope that NHL fans can identify forwards who perform well in close game situations and use the regression model to determine if they are underperforming/overperforming expectations. The SHAP analysis should make the model less of a "black box" and enable users to gain more insight into playing styles that influence the predictions. For those more statistically inclined, the prediction intervals can show players who are truly "clutch". The influential points also identify genuinely clutch performers who exceed statistical expectations.
