@@ -31,9 +31,13 @@ st.markdown("""
 def load_data():
     return pd.read_csv("clutch.csv")
 
-# Load data
+def load_data_historical():
+    return pd.read_csv("21_24_clutch.csv")
+
 
 df = load_data()
+df_historical = load_data_historical()
+
 df['teamAbbrevs'] = df['teamAbbrevs'].apply(lambda x: x.split(',')[0].strip() if ',' in x else x)
 df['headshot'] = 'https://assets.nhle.com/mugs/nhl/20252026/' + df['teamAbbrevs'] + '/' + df['playerId'].astype(str) + '.png'
 df['logo'] = 'https://assets.nhle.com/logos/nhl/svg/' + df['teamAbbrevs'] + '_dark.svg'
@@ -47,7 +51,7 @@ def format_top_features(row):
 
 df['key_factors'] = df.apply(format_top_features, axis=1)
 
-tab1, tab2, tab3, tab4 = st.tabs(["Player Profile", "Full Rankings", "Model Performance", "Methodology"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Player Profile", "Full Rankings", "Model Performance", "Methodology", "Insights"])
 
 with tab1:
 
@@ -67,13 +71,13 @@ with tab1:
     with col_info:
         with st.expander("ℹ️ About Clutch Score"):
             st.write("""
-            **Clutch Score** weights goals scored in critical game situations:
+            **Clutch Score** weights goals scored in critical game situations during the regular season:
 
             - **Tied games** (45%)  
             - **Team is down by 1 goal** (35%)  
             - **Overtime** (20%)  
 
-            A statistical model uses various underlying performance metrics (scoring chances, assists, time on ice, rebounds created, offensive zone starts, shooting %)
+            A statistical model uses various underlying performance metrics (scoring chances, assists, rebounds created, offensive zone starts, shooting %)
             to predict a player's clutch score. The model’s **expected clutch score** can then be compared 
             to a player’s **actual clutch score** to determine whether they are **exceeding or underperforming expectations**. Players exceeding predictions perform better under pressure than their stats suggest.         
 
@@ -132,23 +136,27 @@ with tab1:
     col_left, col_right = st.columns(2)
 
     with col_left:
-        st.markdown("<h5 style='margin-top:5px; margin-bottom:5px;'>Clutch Goal Breakdown</h5>", unsafe_allow_html=True)
-        fig_pie = go.Figure(data=[go.Pie(
-            labels=['Down One', 'Tied', 'OT'],
-            values=[player_data['goals_down_by_one'], player_data['goals_when_tied'], player_data['ot_goals']],
-            hole=.4,
-            marker=dict(colors=['#B12E38', '#276BB0', '#660089']),
-            textfont=dict(size=15),
-            textposition='inside',
-            textinfo='percent',
-            hovertemplate='<b>%{label}</b><br>%{value} goals<br>%{percent}<extra></extra>'              
+        player_seasons = pd.concat([df, df_historical])
+        player_seasons['rank'] = player_seasons.groupby('season')['log_adjusted'].rank(ascending=False, method='min')
+        player_seasons = player_seasons[player_seasons['Player'] == player_name].sort_values('season')
+        st.markdown("<h5 style='margin-top:5px; margin-bottom:5px;'>Clutch Score by Season</h5>", unsafe_allow_html=True)
+        fig_line = go.Figure(data=[go.Scatter(
+            x=player_seasons['season'],
+            y=player_seasons['log_adjusted'],
+            customdata=player_seasons[['rank']],
+            mode='lines+markers',
+            line=dict(color="#4A90E2", width=3),
+            marker=dict(size=10, color="#FFFFFF"),
+            hovertemplate='<b>%{x}</b><br>Clutch Score: %{y:.2f}<br>Rank: %{customdata[0]:.0f}<extra></extra>'
         )])
-        fig_pie.update_layout(
-            height=200,
+        fig_line.update_layout(
+            height=250,
             margin=dict(t=10, b=10, l=10, r=10),
-            legend=dict(font=dict(size=14))
+            xaxis_title='Season',
+            yaxis_title='Clutch Score',
+            font=dict(size=14)
         )
-        st.plotly_chart(fig_pie)
+        st.plotly_chart(fig_line)
 
     with col_right:
         st.markdown("<h5 style='margin-top:5px; margin-bottom:5px;'>Impact of Metrics on Predicted Clutch Score</h5>", unsafe_allow_html=True)
@@ -164,7 +172,6 @@ with tab1:
             'iHDCF': 'High-Danger Chances',
             'shots': 'Shots',
             'assists': 'Assists',
-            'time_on_ice': 'Ice Time',
             'rebounds_created': 'Rebounds Created',
             'off_zone_starts': 'Offensive Zone Starts',
             'SH%': 'Shooting %'
@@ -230,8 +237,7 @@ with tab2:
     feature_names = {
     'shap_iSCF_per_game': 'Scoring Chances Impact',
     'shap_assists_per_game': 'Assists Impact',
-    'shap_time_on_ice_per_game': 'Ice Time Impact',
-    'shap_rebounds_created_per_game': 'Reabounds Created Impact',
+    'shap_rebounds_created_per_game': 'Rebounds Created Impact',
     'shap_off_zone_starts_per_game': 'Off Zone Starts Impact',
     'shap_SH%': 'Shooting % Impact'
     }
@@ -353,10 +359,14 @@ with tab3:
     st.plotly_chart(fig)
 
     # Add R² metric below
-    st.metric("Model R²", "0.75", help="Model explains 75% of variance in clutch performance. 75% of the changes in " \
-    "clutch score are accounted for by the model's features while the remaining 25% cannot be explained due to players " \
+    st.metric("Model R²", "0.77", help="Model explains 77% of variance in clutch performance. 77% of the changes in " \
+    "clutch score are accounted for by the model's features while the remaining 23% cannot be explained due to players " \
     "exceeding or underperforming expectations.")
 
 with tab4:
     with open("README.md", "r", encoding="utf-8") as f:
+        st.markdown(f.read())
+
+with tab5:
+    with open("Insights.md", "r", encoding="utf-8") as f:
         st.markdown(f.read())

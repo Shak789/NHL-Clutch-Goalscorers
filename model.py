@@ -1,3 +1,4 @@
+import time
 import requests
 import functools as ft
 import scipy.stats as stats
@@ -81,6 +82,7 @@ for name, (url, new_column_name) in urls.items():
     df = pd.read_html(url, header=0, index_col=0, na_values=["-"])[0]
     df.rename(columns={'Goals': new_column_name}, inplace=True)
     dataframes[name] = df
+    time.sleep(2)
 
 goals_up_one_df = dataframes["goals_up_one"]
 goals_down_one_df = dataframes["goals_down_one"]
@@ -132,7 +134,7 @@ merged_clutch_goals_prediction['clutch_score_rank']  = merged_clutch_goals_predi
 merged_clutch_goals_prediction['clutch_score'] = merged_clutch_goals_prediction['clutch_score'].apply(lambda x: round(x, 2))
 merged_clutch_goals_prediction.sort_values('clutch_score_rank', inplace = True)
 
-x_var = ['iSCF_per_game', 'assists_per_game', 'rebounds_created_per_game', 'time_on_ice_per_game', 'off_zone_starts_per_game', 'SH%']
+x_var = ['iSCF_per_game', 'assists_per_game', 'rebounds_created_per_game', 'off_zone_starts_per_game', 'SH%']
 X_adjusted = merged_clutch_goals_prediction[x_var]
 y_var = 'clutch_score'
 y = merged_clutch_goals_prediction[y_var]
@@ -194,7 +196,11 @@ merged_clutch_goals_prediction['Significantly_Clutch'] = np.where(
     'Outside Range'
 )
 
-explainer = shap.LinearExplainer(ridge_cv_log_loaded, X_log)
+explainer = shap.LinearExplainer(
+    ridge_cv_log_loaded, 
+    X_log, 
+    feature_perturbation="correlation_dependent" 
+)
 shap_values = explainer(X_log)
 
 shap_df = pd.DataFrame(
@@ -207,4 +213,5 @@ for col in shap_df.columns:
     merged_clutch_goals_prediction[f'shap_{col}'] = shap_df[col]
 
 merged_clutch_goals_prediction = merged_clutch_goals_prediction.loc[merged_clutch_goals_prediction['goals'] >= 20]
+merged_clutch_goals_prediction['season'] = '2024-2026'
 merged_clutch_goals_prediction.to_csv("clutch.csv")
