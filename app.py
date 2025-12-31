@@ -22,7 +22,7 @@ st.markdown("""
 </style>
 <div class="mobile-notice">
     <p style="background-color: #d4edda; padding: 10px; border-radius: 5px;">
-        📱 Rotate to landscape for best experience
+        📱 Rotate Player Profile Page to landscape for best experience
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -51,7 +51,7 @@ def format_top_features(row):
 
 df['key_factors'] = df.apply(format_top_features, axis=1)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Player Profile", "Full Rankings", "Model Performance", "Methodology", "Insights"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Player Profile", "Full Rankings", "Trends", "Model Performance", "Methodology", "Insights"])
 
 with tab1:
 
@@ -71,13 +71,16 @@ with tab1:
     with col_info:
         with st.expander("ℹ️ About Clutch Score"):
             st.write("""
-            **Clutch Score** weights goals scored in critical game situations during the regular season:
+            Clutch score measures how often players score per 60 minutes during high-pressure situations:
 
-            - **Tied games** (45%)  
-            - **Team is down by 1 goal** (35%)  
-            - **Overtime** (20%)  
-
-            A statistical model uses various underlying performance metrics (scoring chances, assists, rebounds created, offensive zone starts, shooting %)
+            - When the game is tied
+            - When the team is down by 1 goal
+                     
+            Higher scores mean that a player scores more frequently in close and tied games. All metrics are normalized per 60 to show if players are efficiently scoring in critical situations, rather than providing a high score when the player is simply deployed more.
+            
+            **Note:** Scores are scaled for easier interpretation. The relative values matter more than the absolute numbers (e.g. a score of 30 is better than 25).
+                     
+            A statistical model uses various underlying performance metrics (scoring chances, assists, rebounds created, shooting %)
             to predict a player's clutch score. The model’s **expected clutch score** can then be compared 
             to a player’s **actual clutch score** to determine whether they are **exceeding or underperforming expectations**. Players exceeding predictions perform better under pressure than their stats suggest.         
 
@@ -103,10 +106,10 @@ with tab1:
             st.metric("Predicted", f"{player_data['predicted_clutch_score_adjusted']:.2f}")
         
         with col2:
-            st.metric("Current", f"{player_data['log_adjusted']:.2f}")
+            st.metric("Current", f"{player_data['actual_clutch_score_adjusted']:.2f}")
         
         with col3:
-            residual_pct = ((player_data['log_adjusted'] - player_data['predicted_clutch_score_adjusted']) / 
+            residual_pct = ((player_data['actual_clutch_score_adjusted'] - player_data['predicted_clutch_score_adjusted']) / 
                             player_data['predicted_clutch_score_adjusted'] * 100)
             st.metric("Difference", f"{residual_pct:.2f}%", delta=f"{residual_pct:.2f}%")
         
@@ -115,7 +118,7 @@ with tab1:
         col_rank, col_tier = st.columns(2)
         
         with col_rank:
-            rank = (df['log_adjusted'] > player_data['log_adjusted']).sum() + 1
+            rank = (df['actual_clutch_score_adjusted'] > player_data['actual_clutch_score_adjusted']).sum() + 1
             st.markdown(f"<h2 style='margin:0;'>{rank}</h2>", unsafe_allow_html=True)
             st.markdown("*Clutch Ranking*")
         
@@ -136,13 +139,18 @@ with tab1:
     col_left, col_right = st.columns(2)
 
     with col_left:
-        player_seasons = pd.concat([df, df_historical])
-        player_seasons['rank'] = player_seasons.groupby('season')['log_adjusted'].rank(ascending=False, method='min')
+
+        player_seasons = pd.concat([df, df_historical], ignore_index=True)
+        season_card = ['2021-2022', '2022-2023', '2023-2024', '2024-2026']
+        player_seasons = player_seasons.loc[player_seasons['season'].isin(season_card)]
+        player_seasons['rank'] = player_seasons.groupby('season')['actual_clutch_score_adjusted'].rank(ascending=False, method='min')
         player_seasons = player_seasons[player_seasons['Player'] == player_name].sort_values('season')
+
+        
         st.markdown("<h5 style='margin-top:5px; margin-bottom:5px;'>Clutch Score by Season</h5>", unsafe_allow_html=True)
         fig_line = go.Figure(data=[go.Scatter(
             x=player_seasons['season'],
-            y=player_seasons['log_adjusted'],
+            y=player_seasons['actual_clutch_score_adjusted'],
             customdata=player_seasons[['rank']],
             mode='lines+markers',
             line=dict(color="#4A90E2", width=3),
@@ -165,14 +173,14 @@ with tab1:
         feature_impacts.index = feature_impacts.index.str.replace('shap_', '').str.replace('_per_game', '')
         
         feature_names = {
-            'iSCF': 'Scoring Chances',
+            'iSCF_per_60': 'Scoring Chances',
             'ixG': 'Expected Goals',
             'iCF': 'Shot Attempts',
             'iFF': 'Unblocked Shot Attempts',
             'iHDCF': 'High-Danger Chances',
             'shots': 'Shots',
-            'assists': 'Assists',
-            'rebounds_created': 'Rebounds Created',
+            'assists_per_60': 'Assists',
+            'rebounds_created_per_60': 'Rebounds Created',
             'off_zone_starts': 'Offensive Zone Starts',
             'SH%': 'Shooting %'
         }
@@ -198,7 +206,7 @@ with tab1:
         st.plotly_chart(fig_bar)
     
             
-    st.caption("Data retrieved from the NHL API and Natural Stat Trick.") 
+    st.caption("Data retrieved from the NHL API and Natural Stat Trick. Players must have minimum 150 TOI in clutch situations (i.e. when the game is tied or when the team is down by 1 goal) and score at least 10 goals per season.") 
     file_time = os.path.getmtime('clutch.csv')
     last_updated = datetime.fromtimestamp(file_time)
     st.caption(f"Data last updated: {last_updated.strftime('%Y-%m-%d')}. Dashboard refreshed daily at 9:00 a.m. EST.")
@@ -206,94 +214,144 @@ with tab1:
     
 
 with tab2:
-    st.title("NHL Clutch Rankings")
+    
+    player_seasons = pd.concat([df, df_historical], ignore_index=True)
 
-    df['interval'] = (
-    "(" 
-    + df['lower_bound_log'].round(2).astype(str)
-    + ", "
-    + df['upper_bound_log'].round(2).astype(str)
-    + ")"
+    player_seasons['teamAbbrevs'] = player_seasons['teamAbbrevs'].apply(lambda x: x.split(',')[0].strip() if ',' in x else x)
+
+    selected_season = st.selectbox(
+        "Select Season",
+        options = player_seasons['season'].unique(),
+        index=0
     )
 
-    
-    
-    # Prepare display dataframe
-    display_df = df.copy()
+    display_df = player_seasons.copy()
 
-    
-    
-    display_df['residual_pct'] = ((display_df['log_adjusted'] - display_df['predicted_clutch_score_adjusted']) / 
-                                   display_df['predicted_clutch_score_adjusted'] * 100).round(2)
-    
-    display_df = display_df.sort_values('log_adjusted', ascending=False).reset_index(drop=True)
-    display_df.index += 1  # Start ranking at 1
-    
-    # Display with images (requires custom HTML or st.dataframe with column config)
+    display_df = display_df[display_df['season'] == selected_season]
 
-    shap_cols = [c for c in player_data.index if c.startswith('shap_')]
-    feature_impacts = player_data[shap_cols].abs().sort_values(ascending=False)
+    display_df = display_df.sort_values('actual_clutch_score_adjusted', ascending=False).reset_index(drop=True)
+    display_df.index += 1
 
-    feature_names = {
-    'shap_iSCF_per_game': 'Scoring Chances Impact',
-    'shap_assists_per_game': 'Assists Impact',
-    'shap_rebounds_created_per_game': 'Rebounds Created Impact',
-    'shap_off_zone_starts_per_game': 'Off Zone Starts Impact',
-    'shap_SH%': 'Shooting % Impact'
-    }
-    
-    # Add renamed SHAP columns to display
-    shap_display_cols = {}
-    for old_name, new_name in feature_names.items():
-        if old_name in display_df.columns:
-            # Convert to percentage
-            display_df[f'{old_name}_pct'] = display_df[old_name].abs() / (display_df[shap_cols].abs().sum(axis = 1)) * 100
-            shap_display_cols[f'{old_name}_pct'] = st.column_config.NumberColumn(
-                new_name,
-                format="%.2f%%"
-            )
-    
-    col1, col2 = st.columns(2)
+    # Only show intervals/SHAP for current season
+    show_advanced = (selected_season == '2024-2026')
 
-    with col1:
-        # Player name search
-        player_search = st.text_input("Search Player Name", "")
+    base_cols = ['Player', 'teamAbbrevs', 'actual_clutch_score_adjusted']
+
+    if show_advanced:
+        display_df['interval'] = (
+            "(" + display_df['lower_bound_log'].round(2).astype(str) + ", " + 
+            display_df['upper_bound_log'].round(2).astype(str) + ")"
+        )
+
+
+        display_df['residual_pct'] = (
+            (display_df['actual_clutch_score_adjusted'] - display_df['predicted_clutch_score_adjusted']) / 
+            display_df['predicted_clutch_score_adjusted'] * 100
+        ).round(2)
+    
+        feature_names = {
+            'shap_iSCF_per_60': 'Scoring Chances Impact',
+            'shap_assists_per_60': 'Assists Impact',
+            'shap_rebounds_created_per_60': 'Rebounds Created Impact',
+            'shap_SH%': 'Shooting % Impact'
+        }
         
-    with col2:
-        # Team filter
-        all_teams = ['All'] + sorted(display_df['teamAbbrevs'].unique().tolist())
-        selected_team = st.selectbox("Filter by Team", all_teams)
-
-    display_df = display_df[['Player', 'teamAbbrevs', 'predicted_clutch_score_adjusted', 
-                    'log_adjusted', 'residual_pct', 'interval', 'Significantly_Clutch'] + [f'{k}_pct' for k in feature_names.keys()]]
-
-    # Apply filters
-    filtered_df = display_df.copy()
-
-    if player_search:
-        filtered_df = filtered_df[
-            filtered_df['Player'].str.contains(player_search, case=False, na=False)
-        ]
-
-    if selected_team != 'All':
-        filtered_df = filtered_df[filtered_df['teamAbbrevs'] == selected_team]
-
-    st.dataframe(
-        filtered_df,
-        column_config={
+        shap_cols = [c for c in display_df.columns if c.startswith('shap_')]
+        shap_display_cols = {}
+        
+        for old_name, new_name in feature_names.items():
+            if old_name in display_df.columns:
+                display_df[f'{old_name}_pct'] = (
+                    display_df[old_name].abs() / display_df[shap_cols].abs().sum(axis=1) * 100
+                )
+                shap_display_cols[f'{old_name}_pct'] = st.column_config.NumberColumn(
+                    new_name, format="%.2f%%"
+                )
+        
+        display_cols = ['Player', 'teamAbbrevs', 'predicted_clutch_score_adjusted', 'actual_clutch_score_adjusted', 'residual_pct',  'interval', 'Significantly_Clutch'] + [f'{k}_pct' for k in feature_names.keys()]
+        
+        column_config = {
             "Player": "Player",
             "teamAbbrevs": "Team",
             "predicted_clutch_score_adjusted": "Predicted Score",
-            "log_adjusted": "Actual Score",
+            "actual_clutch_score_adjusted": "Actual Score",
             "residual_pct": st.column_config.NumberColumn("Difference", format="%.2f%%"),
             "interval": "Predicted Score Range",
             "Significantly_Clutch": "Inside/Outside Score Range",
             **shap_display_cols
-        },
-        hide_index=False
-    )
+        }
+    else:
+        display_cols = base_cols
+        column_config = {
+            "Player": "Player",
+            "teamAbbrevs": "Team",
+            "predicted_clutch_score_adjusted": "Predicted Score",
+            "actual_clutch_score_adjusted": "Actual Score",
+            "residual_pct": st.column_config.NumberColumn("Difference", format="%.2f%%")
+        }
+        st.info("Predictions and impact of metrics available for 2024-2026 season only")
+
+    # Filters
+    col1, col2 = st.columns(2)
+    with col1:
+        player_search = st.text_input("Search Player Name", "")
+    with col2:
+        all_teams = ['All'] + sorted(display_df['teamAbbrevs'].unique().tolist())
+        selected_team = st.selectbox("Filter by Team", all_teams)
+    
+
+    # Apply filters
+    filtered_df = display_df[display_cols].copy()
+    if player_search:
+        filtered_df = filtered_df[filtered_df['Player'].str.contains(player_search, case=False, na=False)]
+    if selected_team != 'All':
+        filtered_df = filtered_df[filtered_df['teamAbbrevs'] == selected_team]
+    
+    st.dataframe(filtered_df, column_config=column_config, hide_index=False)
+    st.caption("Data retrieved from the NHL API and Natural Stat Trick. Players must have minimum 150 TOI in clutch situations (i.e. when the game is tied or when the team is down by 1 goal) and score at least 10 goals per season.") 
+
 
 with tab3:
+
+    player_seasons = pd.concat([df, df_historical], ignore_index=True)
+
+    player_name = st.selectbox("Select a Player", sorted(player_seasons['Player'].unique()), key="player_trends_select")
+
+    player_seasons['rank'] = player_seasons.groupby('season')['actual_clutch_score_adjusted'].rank(ascending=False, method='min')
+    player_seasons = player_seasons[player_seasons['Player'] == player_name].sort_values('season')
+
+    
+    st.markdown("<h5 style='margin-top:5px; margin-bottom:5px;'>Clutch Score by Season</h5>", unsafe_allow_html=True)
+    fig_line = go.Figure(data=[go.Scatter(
+        x=player_seasons['season'],
+        y=player_seasons['actual_clutch_score_adjusted'],
+        customdata=player_seasons[['rank']],
+        mode='lines+markers',
+        line=dict(color="#4A90E2", width=3),
+        marker=dict(size=10, color="#FFFFFF"),
+        hovertemplate='<b>%{x}</b><br>Clutch Score: %{y:.2f}<br>Rank: %{customdata[0]:.0f}<extra></extra>'
+    )])
+    y_min = player_seasons['actual_clutch_score_adjusted'].min()
+    y_max = player_seasons['actual_clutch_score_adjusted'].max()
+
+
+    fig_line.update_layout(
+        height=400,
+        margin=dict(t=10, b=10, l=10, r=10),
+        xaxis_title='Season',
+        yaxis_title='Clutch Score',
+        yaxis=dict(
+            autorange=False,
+            range=[y_min * 0.95, y_max * 1.05]
+        ),
+        font=dict(size=14)
+    )
+
+    st.plotly_chart(fig_line, key="player_trends_chart")
+    st.caption("Data retrieved from the NHL API and Natural Stat Trick. Players must have minimum 150 TOI in clutch situations (i.e. when the game is tied or when the team is down by 1 goal) and score at least 10 goals per season.") 
+
+
+with tab4:
 
     col1new, col2new = st.columns(2)
 
@@ -321,11 +379,11 @@ with tab3:
     # Create interactive scatter plot
     fig = px.scatter(
         filtered_df,
-        x='log_adjusted',
+        x='actual_clutch_score_adjusted',
         y='predicted_clutch_score_adjusted',
         hover_data=['Player', 'teamAbbrevs'],
         labels={
-            'log_adjusted': 'Actual Clutch Score',
+            'actual_clutch_score_adjusted': 'Actual Clutch Score',
             'predicted_clutch_score_adjusted': 'Predicted Clutch Score'
         },
         title='Actual vs. Predicted Clutch Performance'
@@ -333,10 +391,10 @@ with tab3:
 
     # Add diagonal reference line
     fig.add_scatter(
-        x=[df['log_adjusted'].min(), 
-        df['log_adjusted'].max()],
-        y=[df['log_adjusted'].min(), 
-        df['log_adjusted'].max()],
+        x=[df['actual_clutch_score_adjusted'].min(), 
+        df['actual_clutch_score_adjusted'].max()],
+        y=[df['actual_clutch_score_adjusted'].min(), 
+        df['actual_clutch_score_adjusted'].max()],
         mode='lines',
         line=dict(color='red', width=2),
         name='Perfect Prediction',
@@ -357,16 +415,13 @@ with tab3:
     )
 
     st.plotly_chart(fig)
+    st.caption("Data retrieved from the NHL API and Natural Stat Trick. Players must have minimum 150 TOI in clutch situations (i.e. when the game is tied or when the team is down by 1 goal) and score at least 10 goals per season.") 
 
-    # Add R² metric below
-    st.metric("Model R²", "0.77", help="Model explains 77% of variance in clutch performance. 77% of the changes in " \
-    "clutch score are accounted for by the model's features while the remaining 23% cannot be explained due to players " \
-    "exceeding or underperforming expectations.")
 
-with tab4:
+with tab5:
     with open("README.md", "r", encoding="utf-8") as f:
         st.markdown(f.read())
 
-with tab5:
+with tab6:
     with open("Insights.md", "r", encoding="utf-8") as f:
         st.markdown(f.read())
