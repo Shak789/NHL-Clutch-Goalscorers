@@ -21,8 +21,8 @@ st.markdown("""
 }
 </style>
 <div class="mobile-notice">
-    <p style="background-color: #d4edda; padding: 10px; border-radius: 5px;">
-        📱 Rotate Player Profile Page to landscape for best experience
+    <p style="background-color: var(--secondary-background-color); color: var(--text-color); padding: 10px; border-radius: 5px;">
+        📱 Rotate to landscape for best experience
     </p>
 </div>
 """, unsafe_allow_html=True)
