@@ -16,17 +16,34 @@ Clutch Score measures how often players score per 60 minutes during high-pressur
 - When the game is tied
 - When the team is down by 1 goal
                      
-Higher scores mean a player scores more frequently in close and tied games. All metrics are normalized per 60 to show if players are efficiently scoring in critical situations, rather than providing a high score when the player is simply deployed more.
+Higher scores mean a player scores more frequently in close and tied games. The formula is shown below:
+
+st.image("formula.png", caption="Formula", use_container_width=True)
+
+
+
+Clutch Score = (Goals when tied + Goals when down by 1) / TOI in those situations × 60
+
+Where TOI = time on ice (minutes) during tied or down-by-1 game states.
+
+All metrics are normalized per 60 to show if players are efficiently scoring in critical situations, rather than providing a high score when the player is simply deployed more. 
+
+A log transformation is appplied to the score (as explained )
+
+To avoid unreliable samples, players must have minimum 150 TOI in clutch situations (i.e. when the game is tied or when the team is down by 1 goal) and score at least 10 goals per season.
 
 #### Building a Classification Model
 It seemed logical to classify players as "clutch" and "non-clutch". Thresholds were set for the clutch score and an XGBoost model was trained on data from the 2021-2022 to the 2023-2024 NHL season. The model used various underlying performance metrics such as expected goals, high-danger scoring chances, shot attempts. While the model was successful in identifying elite players and those below average, it struggled with players who fell near the classification boundaries, where small differences in their stats made it difficult to confidently label them as clutch or non-clutch. 
 
 #### Switching to a Regression Model
-Linear regression was a more feasible approach since many of the features were strongly correlated with a clutch score. It would be easier to predict a player's clutch score rather than assigning the player an ambiguous label. 
+Linear regression is a more feasible approach since many of the features are strongly correlated with clutch score. It is easier to predict a player's clutch score rather than assigning the player an ambiguous label. 
 
-However, there was high multicollinearity among the features since they exhibited extreme Variance Inflation Factor (VIF) values of greater than 10. Therefore, ridge regression was used to limited the effect of multicollinearity on coefficients by shrinking correlated coefficients towards 0. This would improve their stability compared to standard OLS. Ridge regression was more appropriate than lasso regression, since it does not set coefficients to exactly 0 and preserves intepretability of the coefficients under multicollnearity. Ridge regression also reduced overfitting. After approximately 150 samples, both training and validation curves converge to an MSE of less than 2.
+However, there is high multicollinearity among the features since they exhibit extreme Variance Inflation Factor (VIF) values of greater than 10. Therefore, this project uses ridge regression to limit the effect of multicollinearity on coefficients by shrinking correlated coefficients towards 0. This improves the stability of coefficients compared to standard OLS. Ridge regression is more appropriate than lasso or elastic net regression, since it does not set coefficients to exactly 0 and preserves intepretability of the coefficients under multicollnearity. Ridge regression also reduces overfitting. After approximately 150 samples, both training and validation curves converge to an MSE of less than 2 (Figure 1).
 
-Time Series Cross-Validation was used to avoid leaking future information during traning due to the temporal nature of the data (2021-2024 seasons). The model showed good performance because it has a low MSE of approximately 1 and R² of 75% in training.
+Time Series Cross-Validation is used to avoid leaking future information during traning due to the temporal nature of the data (2021-2024 seasons). The model showed decent performance because 
+
+![](path/to/image.jpg)
+**Figure 1: Learning curves for ridge regression model after training**
 
 #### Dealing with Outliers
 Cook's distance helped identify influential points. The model underpredicted the clutch score of elite players because their feature stats set a "ceiling" for their clutch ability. Some of these players  may have high leverage due to extreme. feature values (e.g. iSCF, SH%, assists). The model also overestimated some elite players who had strong underlying metrics but did not perform well in clutch games. Thus, a log transformation was applied on the clutch score, which enabled the model to generate better predictions for elite players and reduced the number of influential points. 
@@ -34,8 +51,8 @@ Cook's distance helped identify influential points. The model underpredicted the
 After the transformation, the model still undervalued some players who performed better in close and tied situations than their metrics suggest. While influential points are often viewed negatively, they can show which players perform better under pressure than their stats suggest. 
 
 #### Prediction Intervals
-95% prediction intervals were generated for each player. If actual clutch scores fall outside the intervals, this indicates that clutch performance is significantly different from expectations.
-The intervals are generated using a bootstrap procedure with resampled residual noise, which ensures that the intervals reflect randomness in clutch performance. Approximately 5% of players fall outside range.
+95% prediction intervals are generated for each player. If actual clutch scores fall outside the intervals, this indicates that clutch performance is significantly different from expectations.
+The intervals are generated using a bootstrap procedure with resampled residual noise, which ensures that the intervals reflect randomness in clutch performance. Approximately 5% of players are outside range.
 
 #### SHAP Values
 SHAP values were calculated to explain which features most influenced each player's prediction. Due to the extremely high VIF values, multicollinearity may still be present even when using ridge regression. Therefore, SHAP is used with **feature_perturbation = "correlation_dependent"**. This accounts for correlations between the features when determining their contributions. Therefore, SHAP values will better reflect the true conditional contribution of each feature, rather than being distorted by multicollinearity.
