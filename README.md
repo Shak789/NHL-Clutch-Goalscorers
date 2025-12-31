@@ -68,7 +68,7 @@ SHAP values were calculated to explain which features most influenced each playe
 ![Formula](https://raw.githubusercontent.com/shak789/NHL-Clutch-Goalscorers/main/SHAP_Plot.png)
 
 #### Using the Model on a Final Test Set
-The model was tested on player data from the 2024-2025 season to the current point of the 2025-2026 season. The R² of approximately 55% indicates the model explains 55% of variance in clutch performance. While this is lower than the 63% R^2 in training, it is reasonable since it is much harder to predict the scoring efficiency of players in high-pressure situations with inherent randomness.
+The model was tested on player data from the 2024-2025 season to the current point of the 2025-2026 season. The R² of approximately 56% indicates the model explains 56% of variance in clutch performance. While this is lower than the 63% R^2 in training, it is reasonable since it is much harder to predict the scoring efficiency of players in high-pressure situations with inherent randomness.
 
 ### Temporal Stability
 It is important to verify if clutch scoring truly exists. The year-over-year correlations (r = 0.437 for 2021-2022 vs 2022-2023, r = 0.370 for 2022-2023 vs 2023-2024, r = 0.375 for 2023-2024 vs 2024-2026) are all greater than 0.3. This shows that clutch scoring has some repeatability, but noise still exists in these situations. 
