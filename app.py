@@ -21,7 +21,7 @@ st.markdown("""
 }
 </style>
 <div class="mobile-notice">
-    <p style="background-color: var(--secondary-background-color); color: var(--text-color); padding: 10px; border-radius: 5px;">
+    <p style="background-color: var(--secondary-background-color); color: var(--text-color);
         📱 Rotate to landscape for best experience
     </p>
 </div>
@@ -76,7 +76,7 @@ with tab1:
             - When the game is tied
             - When the team is down by 1 goal
                      
-            Higher scores mean that a player scores more frequently in close and tied games. All metrics are normalized per 60 to show if players are efficiently scoring in critical situations, rather than providing a high score when the player is simply deployed more.
+            Higher scores mean that a player scores more frequently in close and tied games. The score is normalized per 60 to show if players are efficiently scoring in critical situations, rather than providing a high score when the player is simply deployed more.
             
             **Note:** Scores are scaled for easier interpretation. The relative values matter more than the absolute numbers (e.g. a score of 30 is better than 25).
                      
