@@ -40,6 +40,8 @@ The following features were used to predict a player's clutch score:
 - Rebounds Created
 - Assists
 
+Other features such as zone starts, Quality of Competition and Quality of Teammates were considered but did not improve the model. The current features seem predict the clutch score adequately.
+
 As with the clutch score, these features are normalized per 60 so that they can measure scoring efficiency, not volume.
 
 ![Formula](https://raw.githubusercontent.com/shak789/NHL-Clutch-Goalscorers/main/Feature_Formula.png)
