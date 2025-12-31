@@ -18,7 +18,7 @@ Clutch Score measures how often players score per 60 minutes during high-pressur
                      
 Higher scores mean a player scores more frequently in close and tied games. The formula is shown below:
 
-st.image("formula.png", caption="Formula", use_container_width=True)
+![](formula.png)
 
 
 
