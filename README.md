@@ -40,11 +40,15 @@ The following features were used to predict a player's clutch score:
 - Rebounds Created
 - Assists
 
-Other features such as zone starts, Quality of Competition and Quality of Teammates were considered but did not improve the model. The current features seem to predict the clutch score well enough.
+These features show moderate/strong positive correlation with clutch score as shown by the scatter plots below (note that some outliers are distoring the r values):
+
+![Formula](https://raw.githubusercontent.com/shak789/NHL-Clutch-Goalscorers/main/Correlation.png)
 
 As with the clutch score, these features are normalized per 60 so that they can measure scoring efficiency, not volume.
 
 ![Formula](https://raw.githubusercontent.com/shak789/NHL-Clutch-Goalscorers/main/Feature_Formula.png)
+
+This means that other feautures, such as Quality of Competition and Quality of Teammates were not considered because they could not be normalized per 60 minutes during high-pressure situations.
 
 #### Ridge Regression
 There is high multicollinearity among the features since they exhibit extreme Variance Inflation Factor (VIF) values of greater than 10. Therefore, this project uses ridge regression to limit the effect of multicollinearity on coefficients by shrinking correlated coefficients towards 0. This improves the stability of coefficients compared to standard OLS. Ridge regression is more appropriate than lasso or elastic net regression, since it does not set coefficients to exactly 0 and preserves interpretability of the coefficients under multicollinearity. 
