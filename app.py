@@ -20,8 +20,15 @@ st.markdown("""
     }
 }
 </style>
+
 <div class="mobile-notice">
-    <p style="background-color: var(--secondary-background-color); color: var(--text-color);
+    <p style="
+        background-color: var(--secondary-background-color);
+        color: var(--text-color);
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+    ">
         📱 Rotate to landscape for best experience
     </p>
 </div>
@@ -76,16 +83,16 @@ with tab1:
             - When the game is tied
             - When the team is down by 1 goal
                      
-            Higher scores mean that a player scores more frequently in close and tied games. The score is normalized per 60 to show if players are efficiently scoring in critical situations, rather than providing a high score when the player is simply deployed more.
-            
-            **Note:** Scores are scaled for easier interpretation. The relative values matter more than the absolute numbers (e.g. a score of 30 is better than 25).
-                     
+            Higher scores mean a player scores more frequently in close and tied games. The formula is shown below:
+
+            ![Formula](https://raw.githubusercontent.com/shak789/NHL-Clutch-Goalscorers/main/formula.png)
+                                             
             A statistical model uses various underlying performance metrics (scoring chances, assists, rebounds created, shooting %)
             to predict a player's clutch score. The model’s **expected clutch score** can then be compared 
             to a player’s **actual clutch score** to determine whether they are **exceeding or underperforming expectations**. Players exceeding predictions perform better under pressure than their stats suggest.         
 
             Actual clutch scores reflect performance of forwards from the 2024-2025 season through the current point 
-            of the 2025-2026 season. Only players with 20+ total goals are displayed.
+            of the 2025-2026 season. Players must have minimum 150 TOI in clutch situations (i.e. when the game is tied or when the team is down by 1 goal) and score at least 10 goals per season.
                      
             For details on the model, see the *Methodology* tab above
             """)

@@ -40,7 +40,7 @@ The following features were used to predict a player's clutch score:
 - Rebounds Created
 - Assists
 
-Other features such as zone starts, Quality of Competition and Quality of Teammates were considered but did not improve the model. The current features seem predict the clutch score adequately.
+Other features such as zone starts, Quality of Competition and Quality of Teammates were considered but did not improve the model. The current features seem to predict the clutch score well enough.
 
 As with the clutch score, these features are normalized per 60 so that they can measure scoring efficiency, not volume.
 
@@ -76,6 +76,6 @@ The model was tested on player data from the 2024-2025 season to the current poi
 It is important to verify if clutch scoring truly exists. The year-over-year correlations (r = 0.437 for 2021-2022 vs 2022-2023, r = 0.370 for 2022-2023 vs 2023-2024, r = 0.375 for 2023-2024 vs 2024-2026) are all greater than 0.3. This shows that clutch scoring has some repeatability, but noise still exists in these situations. 
 
 #### Conclusion
-Through this project, I hope that I developed a statistically sound goalscoring model. NHL fans, coaches and management can identify forwards who perform well in close game situations and use the regression model to determine if they are underperforming/overperforming expectations. The SHAP analysis should make the model less of a "black box" and enable users to gain more insight into playing styles that influence the predictions. For those more statistically inclined, the prediction intervals can show players who are truly "clutch". The influential points also identify genuinely clutch performers who exceed statistical expectations.
+Through this project, I hope that I developed a statistically sound goalscoring model. NHL fans, coaches and management can identify forwards who perform well in close game situations and use the regression model to determine if they are underperforming/overperforming expectations. The SHAP analysis should make the model less of a "black box" and enable users to gain more insight into playing styles that influence the predictions. For those more statistically inclined, the prediction intervals can show players who are truly "clutch" or underperforming in high pressue situations.
 
 There are potential extensions for this model (e.g. including playoff data, goalie quality adjustments, venue effects). Third-period filtering would be ideal, as trailing with near the end of the game creates maximum pressure. Future versions could incorporate play-by-play timestamps. While the model has limitations, it provides a data-driven framework for evaluating clutch performance.
