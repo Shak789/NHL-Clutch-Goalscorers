@@ -47,13 +47,13 @@ As with the clutch score, these features are normalized per 60 so that they can 
 ![Formula](https://raw.githubusercontent.com/shak789/NHL-Clutch-Goalscorers/main/Feature_Formula.png)
 
 #### Ridge Regression
-There is high multicollinearity among the features since they exhibit extreme Variance Inflation Factor (VIF) values of greater than 10. Therefore, this project uses ridge regression to limit the effect of multicollinearity on coefficients by shrinking correlated coefficients towards 0. This improves the stability of coefficients compared to standard OLS. Ridge regression is more appropriate than lasso or elastic net regression, since it does not set coefficients to exactly 0 and preserves intepretability of the coefficients under multicollnearity. 
+There is high multicollinearity among the features since they exhibit extreme Variance Inflation Factor (VIF) values of greater than 10. Therefore, this project uses ridge regression to limit the effect of multicollinearity on coefficients by shrinking correlated coefficients towards 0. This improves the stability of coefficients compared to standard OLS. Ridge regression is more appropriate than lasso or elastic net regression, since it does not set coefficients to exactly 0 and preserves interpretability of the coefficients under multicollinearity. 
 
 Ridge regression also reduces overfitting. After approximately 150 samples, both training and validation curves converge:
 
 ![Formula](https://raw.githubusercontent.com/shak789/NHL-Clutch-Goalscorers/main/Learning_Curves.png)
 
-Time Series Cross-Validation is used to avoid leaking future information during traning due to the temporal nature of the data (2021-2024 seasons). The model showed decent performance with an R² of 0.63 after training. 
+Time Series Cross-Validation is used to avoid leaking future information during training due to the temporal nature of the data (2021-2024 seasons). The model showed decent performance with an R² of 0.63 after training. 
 
 #### Dealing with Outliers
 Cook's distance helps identify influential points. The model underpredicts the clutch score of elite players because their feature stats set a "ceiling" for their clutch ability. Some of these players may have high leverage due to extreme feature values (e.g. iSCF, SH%, assists). The model also overestimates some elite players who have strong underlying metrics but do not perform well in clutch games. Thus, a log transformation is applied to the clutch score, which enables the model to generate better predictions for elite players and reduces the number of influential points.
@@ -76,6 +76,10 @@ The model was tested on player data from the 2024-2025 season to the current poi
 It is important to verify if clutch scoring truly exists. The year-over-year correlations (r = 0.437 for 2021-2022 vs 2022-2023, r = 0.370 for 2022-2023 vs 2023-2024, r = 0.375 for 2023-2024 vs 2024-2026) are all greater than 0.3. This shows that clutch scoring has some repeatability, but noise still exists in these situations. 
 
 #### Conclusion
-Through this project, I hope that I developed a statistically sound goalscoring model. NHL fans, coaches and management can identify forwards who perform well in close game situations and use the regression model to determine if they are underperforming/overperforming expectations. The SHAP analysis should make the model less of a "black box" and enable users to gain more insight into playing styles that influence the predictions. For those more statistically inclined, the prediction intervals can show players who are truly "clutch" or underperforming in high pressue situations.
+Through this project, I hope that I developed a statistically sound goalscoring model. NHL fans, coaches and management can identify forwards who perform well in close game situations and use the regression model to determine if they are underperforming/overperforming expectations. The SHAP analysis should make the model less of a "black box" and enable users to gain more insight into playing styles that influence the predictions. For those more statistically inclined, the prediction intervals can show players who are truly "clutch" or underperforming in high pressure situations.
 
 There are potential extensions for this model (e.g. including playoff data, goalie quality adjustments, venue effects). Third-period filtering would be ideal, as trailing with near the end of the game creates maximum pressure. Future versions could incorporate play-by-play timestamps. While the model has limitations, it provides a data-driven framework for evaluating clutch performance.
+
+This project applies machine learning techniques to identify and predict NHL forwards who excel in “clutch” situations (close, tied, and overtime games) during the regular season. The goal is not only to measure clutch performance, but also model expected clutch scoring given a player’s underlying metrics and understand the reasoning behind the predictions.
+
+The full code for the model can be viewed [here](https://github.com/Shak789/NHL-Clutch-Goalscorers/blob/main/Predicting%20NHL%20Clutch%20Goalscorers.pdf).
