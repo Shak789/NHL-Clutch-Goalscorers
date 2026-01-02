@@ -12,7 +12,7 @@ import shap
 import joblib
 
 
-ridge_cv_log_loaded = joblib.load('ridge_cv_model.pkl')
+ridge_cv_loaded = joblib.load('ridge_cv_model.pkl')
 
 all_seasons = []
 
@@ -81,8 +81,12 @@ dataframes = {}
 for name, (url, new_column_name) in urls.items():
     df = pd.read_html(url, header=0, index_col=0, na_values=["-"])[0]
     df.rename(columns={'Goals': new_column_name}, inplace=True)
+    if name == "goals_down_one":
+         df.rename(columns={'TOI': 'TOI_Down_One'}, inplace=True)
+    elif  name == "tied":
+        df.rename(columns={'TOI': 'TOI_Tied'}, inplace=True)
     dataframes[name] = df
-    time.sleep(2)
+    time.sleep(3)
 
 goals_up_one_df = dataframes["goals_up_one"]
 goals_down_one_df = dataframes["goals_down_one"]
@@ -92,15 +96,17 @@ on_ice_df = dataframes["on_ice"]
 on_ice_df.columns = on_ice_df.columns.str.replace('\xa0', ' ')
 
 goals_up_one_df = goals_up_one_df[['Player', 'GP', 'goals_up_by_one']]
-goals_down_one_df = goals_down_one_df[['Player', 'goals_down_by_one']]
-goals_tied_df = goals_tied_df[['Player', 'goals_when_tied']]
-total_df = total_df[['Player', 'total_goals', 'Shots', 'ixG', 'iFF', 'iSCF', 'iHDCF', 'Rebounds Created', 'iCF', 'SH%']]
+goals_down_one_df = goals_down_one_df[['TOI_Down_One', 'Player', 'goals_down_by_one']]
+goals_tied_df = goals_tied_df[['TOI_Tied', 'Player', 'goals_when_tied']]
+total_df = total_df[['TOI', 'Player', 'total_goals', 'Shots', 'ixG', 'iFF', 'iSCF', 'iHDCF', 'Rebounds Created', 'iCF', 'SH%']]
 on_ice_df = on_ice_df[['Player', 'Off. Zone Starts', 'On The Fly Starts']]
 
 dfs_natural_stat = [goals_up_one_df, goals_down_one_df, goals_tied_df, total_df, on_ice_df]
 
 merged_natural_stat = ft.reduce(lambda left, right: pd.merge(left, right, on='Player'), dfs_natural_stat)
-merged_natural_stat = merged_natural_stat.loc[merged_natural_stat['GP'] >= 40]
+merged_natural_stat['clutch_goals'] = merged_natural_stat['goals_down_by_one'] + merged_natural_stat['goals_when_tied']
+merged_natural_stat['TOI_Clutch'] = merged_natural_stat['TOI_Down_One'] + merged_natural_stat['TOI_Tied']
+merged_natural_stat = merged_natural_stat.loc[(merged_natural_stat['TOI_Clutch'] >= 175) & (merged_natural_stat['total_goals'] >= 10)]
 
 rename_columns = {
     'Shots': 'shots',
@@ -118,23 +124,21 @@ merged_clutch_goals_prediction = nhl_api_df.merge(merged_natural_stat, on = 'Pla
 merged_clutch_goals_prediction.drop(columns = 'GP', axis = 1, inplace = True)
 merged_clutch_goals_prediction = merged_clutch_goals_prediction.dropna()
 
-columns = ['ot_goals', 'assists', 'goals_up_by_one', 'goals_down_by_one', 'goals_when_tied', 'shots', 'ixG', 'iFF', 'iSCF', 'iHDCF', 'iCF', 'rebounds_created', 'off_zone_starts', 'on_the_fly_starts']
+columns = ['ot_goals', 'assists', 'goals_up_by_one', 'goals_down_by_one', 'goals_when_tied','shots', 'ixG', 'iFF', 'iSCF', 'iHDCF', 'iCF', 'rebounds_created', 'off_zone_starts', 'on_the_fly_starts']
 for column in columns:
-    per_game_string = f"{column}_per_game"
-    merged_clutch_goals_prediction[per_game_string] = merged_clutch_goals_prediction[column] / merged_clutch_goals_prediction['gamesPlayed']
+    per_60_string = f"{column}_per_60"
+    merged_clutch_goals_prediction[per_60_string] = merged_clutch_goals_prediction[column] / merged_clutch_goals_prediction['TOI_Clutch'] * 60
 
 merged_clutch_goals_prediction['clutch_score'] = (
-    0.45 * merged_clutch_goals_prediction['goals_down_by_one_per_game'] + 
-    0.35 * merged_clutch_goals_prediction['goals_when_tied_per_game'] + 
-    0.2 * merged_clutch_goals_prediction['ot_goals_per_game']
+    merged_clutch_goals_prediction['clutch_goals'] / merged_clutch_goals_prediction['TOI_Clutch'] * 60
 )
 
-merged_clutch_goals_prediction['clutch_score'] *= 100
+merged_clutch_goals_prediction['clutch_score'] *= 10
 merged_clutch_goals_prediction['clutch_score_rank']  = merged_clutch_goals_prediction['clutch_score'].rank(ascending = False, method = 'min')
 merged_clutch_goals_prediction['clutch_score'] = merged_clutch_goals_prediction['clutch_score'].apply(lambda x: round(x, 2))
 merged_clutch_goals_prediction.sort_values('clutch_score_rank', inplace = True)
 
-x_var = ['iSCF_per_game', 'assists_per_game', 'rebounds_created_per_game', 'off_zone_starts_per_game', 'SH%']
+x_var = ['iSCF_per_60', 'assists_per_60', 'rebounds_created_per_60', 'SH%']
 X_adjusted = merged_clutch_goals_prediction[x_var]
 y_var = 'clutch_score'
 y = merged_clutch_goals_prediction[y_var]
@@ -149,21 +153,20 @@ X_shifted = X_scaled + epsilon
 X_log = np.log(X_shifted)
 
 y_log = np.log(y + 1)
-y_pred = ridge_cv_log_loaded.predict(X_log)
-
-y_pred = ridge_cv_log_loaded.predict(X_log)
+y_pred = ridge_cv_loaded.predict(X_log)
 merged_clutch_goals_prediction['predicted_clutch_score'] = y_pred 
 
-merged_clutch_goals_prediction['log'] = np.log(merged_clutch_goals_prediction['clutch_score'] + 1) 
-merged_clutch_goals_prediction['log_adjusted'] = np.log(merged_clutch_goals_prediction['clutch_score'] + 1) * 10
-merged_clutch_goals_prediction['log_adjusted'] = merged_clutch_goals_prediction['log_adjusted'].apply(lambda x: round(x, 2))
+my_pred = ridge_cv_loaded.predict(X_log)
+merged_clutch_goals_prediction['predicted_clutch_score'] = y_pred 
+
+merged_clutch_goals_prediction['actual_clutch_score_adjusted'] = np.log(merged_clutch_goals_prediction['clutch_score'] + 1) * 10
+merged_clutch_goals_prediction['actual_clutch_score_adjusted'] = merged_clutch_goals_prediction['actual_clutch_score_adjusted'].apply(lambda x: round(x, 2))
 merged_clutch_goals_prediction['predicted_clutch_score_adjusted'] = y_pred * 10
 merged_clutch_goals_prediction = merged_clutch_goals_prediction.sort_values(by='predicted_clutch_score_adjusted', ascending = False)
 merged_clutch_goals_prediction['predicted_clutch_score_adjusted'] = merged_clutch_goals_prediction['predicted_clutch_score_adjusted'].apply(lambda x: round(x, 2))
 
-
 n_boot = 1000
-alpha = ridge_cv_log_loaded.alpha_
+alpha = ridge_cv_loaded.alpha_
 
 boot_preds = np.zeros((n_boot, len(X_log)))  
 
@@ -178,7 +181,7 @@ for i in range(n_boot):
 
     preds = ridge.predict(X_log)
 
-    residuals = y_log - ridge_cv_log_loaded.predict(X_log)
+    residuals = y_log - ridge_cv_loaded.predict(X_log)
     noise = np.random.choice(residuals, size=len(X_log), replace=True)
 
     boot_preds[i] = preds + noise
@@ -190,14 +193,14 @@ merged_clutch_goals_prediction['lower_bound_log'] = (lower_log * 10).round(2)
 merged_clutch_goals_prediction['upper_bound_log'] = (upper_log * 10).round(2)
 
 merged_clutch_goals_prediction['Significantly_Clutch'] = np.where(
-    (merged_clutch_goals_prediction['log_adjusted'] >= merged_clutch_goals_prediction['lower_bound_log']) &
-    (merged_clutch_goals_prediction['log_adjusted'] <= merged_clutch_goals_prediction['upper_bound_log']),
+    (merged_clutch_goals_prediction['actual_clutch_score_adjusted'] >= merged_clutch_goals_prediction['lower_bound_log']) &
+    (merged_clutch_goals_prediction['actual_clutch_score_adjusted'] <= merged_clutch_goals_prediction['upper_bound_log']),
     'Inside Range',
     'Outside Range'
 )
 
 explainer = shap.LinearExplainer(
-    ridge_cv_log_loaded, 
+    ridge_cv_loaded, 
     X_log, 
     feature_perturbation="correlation_dependent" 
 )
