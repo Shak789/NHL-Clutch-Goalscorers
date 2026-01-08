@@ -78,18 +78,18 @@ with tab1:
     with col_info:
         with st.expander("ℹ️ About Clutch Score"):
             st.write("""
-            Clutch score measures how often players score per 60 minutes during high-pressure situations:
+            Clutch score measures goals per 60 minutes during high-pressure situations:
 
             - When the game is tied
             - When the team is down by 1 goal
                      
-            Higher scores mean a player scores more frequently in close and tied games. The formula is shown below:
+            Higher scores mean a player scores goals more frequently in close and tied games. The formula is shown below:
 
             ![Formula](https://raw.githubusercontent.com/shak789/NHL-Clutch-Goalscorers/main/formula.png)
                                              
             A statistical model uses various underlying performance metrics (scoring chances, assists, rebounds created, shooting %)
-            to predict a player's clutch score. The model’s **expected clutch score** can then be compared 
-            to a player’s **actual clutch score** to determine whether they are **exceeding or underperforming expectations**. Players exceeding predictions perform better under pressure than their stats suggest.         
+            to predict a player's clutch score. The model’s expected clutch score can then be compared 
+            to a player’s actual clutch score to determine whether they are exceeding or underperforming expectations. Players exceeding predictions perform better under pressure than their stats suggest.         
 
             Actual clutch scores reflect performance of forwards from the 2024-2025 season through the current point 
             of the 2025-2026 season. Players must have minimum 150 TOI in clutch situations (i.e. when the game is tied or when the team is down by 1 goal) and score at least 10 goals per season.
