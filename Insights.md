@@ -1,7 +1,7 @@
 Below are key insights from the model that can lead to actionable decisions from management and coaches (as of **January 1st 2026**):
 
 ### Players who Elevate their Game in Close/Tied Games
-Dylan Guenther's clutch score ranks top frive and is approximately 20% higher than his predicted clutch score. This indicates he elevates his play significantly in critical situations and should continue to be deployed in close/tied games and overtime. Opponents should prioritize defensive coverage on him when the score is tight.
+Dylan Guenther's clutch score ranks top five and is approximately 20% higher than his predicted clutch score. This indicates he elevates his play significantly in critical situations and should continue to be deployed in close/tied games and overtime. Opponents should prioritize defensive coverage on him when the score is tight.
 
 ### Players who Prioritize Playmaking
 Connor McDavid is regarded as one of the best hockey players in the world, but does not rank in the top 100 in clutch goalscoring. His actual score is over 10% lower than his predicted score. However, more than 45% of his predicted score is from assists. Due to his elite assist metrics, the model would expect McDavid to be a clutch goalscorer, but he is most likely creating plays rather than scoring goals in high-pressure situations. He is scoring at a lower rate compared to his 64 goal season in 2022-2023 and his clutch score has also decreased since then. McDavid should be deployed with Draisaitl in close and tied games, since Draisaitl ranks top five in clutch scoring. Opponents should focus on covering the passing lane when McDavid has the puck in tight games.
