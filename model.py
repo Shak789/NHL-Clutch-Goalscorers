@@ -16,7 +16,7 @@ ridge_cv_loaded = joblib.load('ridge_cv_model.pkl')
 
 all_seasons = []
 
-for season in range(2025, 2026):
+for season in range(2024, 2026):
     summary_url = f"https://api.nhle.com/stats/rest/en/skater/summary?limit=-1&cayenneExp=seasonId={season}{season+1}%20and%20gameTypeId=2"
 
     try:
@@ -60,7 +60,7 @@ rename_columns = {
 
 nhl_api_df.rename(columns = rename_columns,  inplace = True)
 
-start_season = "20252026"
+start_season = "20242025"
 end_season = "20252026"
 goals_up_one_url = f"https://www.naturalstattrick.com/playerteams.php?fromseason={start_season}&thruseason={end_season}&stype=2&sit=all&score=u1&stdoi=std&rate=n&team=ALL&pos=F&loc=B&toi=0&gpfilt=none&fd=&td=&tgp=410&lines=single&draftteam=ALL"
 goals_down_one_url = f"https://www.naturalstattrick.com/playerteams.php?fromseason={start_season}&thruseason={end_season}&stype=2&sit=all&score=d1&stdoi=std&rate=n&team=ALL&pos=F&loc=B&toi=0&gpfilt=none&fd=&td=&tgp=410&lines=single&draftteam=ALL"
@@ -216,5 +216,5 @@ for col in shap_df.columns:
     merged_clutch_goals_prediction[f'shap_{col}'] = shap_df[col]
 
 merged_clutch_goals_prediction = merged_clutch_goals_prediction.loc[merged_clutch_goals_prediction['goals'] >= 20]
-merged_clutch_goals_prediction['season'] = '2025-2026'
+merged_clutch_goals_prediction['season'] = '2024-2026'
 merged_clutch_goals_prediction.to_csv("clutch.csv")
