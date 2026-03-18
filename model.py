@@ -78,13 +78,26 @@ urls = {
 
 dataframes = {}
 
+headers = {
+    "User-Agent": "Mozilla/5.0",
+    "Accept-Language": "en-US,en;q=0.9",
+}
+
+dataframes = {}
+
 for name, (url, new_column_name) in urls.items():
-    df = pd.read_html(url, header=0, index_col=0, na_values=["-"])[0]
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+
+    df = pd.read_html(response.text, header=0, index_col=0, na_values=["-"])[0]
+
     df.rename(columns={'Goals': new_column_name}, inplace=True)
+
     if name == "goals_down_one":
-         df.rename(columns={'TOI': 'TOI_Down_One'}, inplace=True)
-    elif  name == "tied":
+        df.rename(columns={'TOI': 'TOI_Down_One'}, inplace=True)
+    elif name == "tied":
         df.rename(columns={'TOI': 'TOI_Tied'}, inplace=True)
+
     dataframes[name] = df
     time.sleep(3)
 
