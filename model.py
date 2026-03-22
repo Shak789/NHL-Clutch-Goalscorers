@@ -2,6 +2,7 @@ import time
 import requests
 import functools as ft
 import scipy.stats as stats
+from io import StringIO
 
 import numpy as np
 import pandas as pd
@@ -68,36 +69,44 @@ tied_url = f"https://www.naturalstattrick.com/playerteams.php?fromseason={start_
 total_url = f"https://www.naturalstattrick.com/playerteams.php?fromseason={start_season}&thruseason={end_season}&stype=2&sit=all&score=all&stdoi=std&rate=n&team=ALL&pos=F&loc=B&toi=0&gpfilt=none&fd=&td=&tgp=410&lines=single&draftteam=ALL"
 on_ice_url = f"https://www.naturalstattrick.com/playerteams.php?fromseason={start_season}&thruseason={end_season}&stype=2&sit=5v5&score=all&stdoi=oi&rate=n&team=ALL&pos=F&loc=B&toi=0&gpfilt=none&fd=&td=&tgp=410&lines=single&draftteam=ALL"
 
-urls = {
-    "goals_up_one": (goals_up_one_url, 'goals_up_by_one'),
-    "goals_down_one": (goals_down_one_url, 'goals_down_by_one'),
-    "tied": (tied_url, 'goals_when_tied'),
-    "total": (total_url, 'total_goals'),
-    "on_ice": (on_ice_url, '')
+TOI_RENAMES = {
+    "goals_down_one": "TOI_Down_One",
+    "tied": "TOI_Tied",
 }
 
-dataframes = {}
-
-headers = {
-    "User-Agent": "Mozilla/5.0",
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.00 Safari/537.36",
     "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://www.naturalstattrick.com/",
 }
 
+urls = {
+    "goals_up_one":   (goals_up_one_url, "goals_up_by_one"),
+    "goals_down_one": (goals_down_one_url, "goals_down_by_one"),
+    "tied":           (tied_url, "goals_when_tied"),
+    "total":          (total_url, "total_goals"),
+    "on_ice":         (on_ice_url, ""),
+}
+
+
+def fetch_nst_table(url: str, retries: int = 3) -> pd.DataFrame:
+    for attempt in range(retries):
+        response = requests.get(url, headers=HEADERS)
+        response.raise_for_status()
+        tables = pd.read_html(StringIO(response.text), header=0, index_col=0, na_values=["-"])
+        if tables:
+            return tables[0]
+        time.sleep(2 ** attempt)
+    raise ValueError(f"No table found after {retries} attempts: {url}")
+
+
 dataframes = {}
-
 for name, (url, new_column_name) in urls.items():
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-
-    df = pd.read_html(response.text, header=0, index_col=0, na_values=["-"])[0]
-
-    df.rename(columns={'Goals': new_column_name}, inplace=True)
-
-    if name == "goals_down_one":
-        df.rename(columns={'TOI': 'TOI_Down_One'}, inplace=True)
-    elif name == "tied":
-        df.rename(columns={'TOI': 'TOI_Tied'}, inplace=True)
-
+    df = fetch_nst_table(url)
+    if new_column_name:
+        df.rename(columns={"Goals": new_column_name}, inplace=True)
+    if name in TOI_RENAMES:
+        df.rename(columns={"TOI": TOI_RENAMES[name]}, inplace=True)
     dataframes[name] = df
     time.sleep(3)
 
